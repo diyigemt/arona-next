@@ -1,3 +1,5 @@
+import { Event } from "./Event";
+
 const CoroutineExceptionHandler = Symbol.for("CoroutineExceptionHandler");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,25 +48,16 @@ enum ListeningStatus {
   STOPPED,
 }
 
-class EventChannel {
-  constructor(private readonly eventListeners: EventListeners = new EventListeners()) {}
+abstract class EventChannel<BaseEvent extends Event> {
+  constructor(readonly baseEventClass: ClassType<BaseEvent>) {}
 
-  async broadcastEvent<E extends Event>(event: E): Promise<E> {
-    await this.callListeners(event);
-    return event;
+  filter(filter: (event: BaseEvent) => Promise<boolean>): EventChannel<BaseEvent> {
+    return new FilterEventChannel(this, filter);
   }
 
-  async callListeners(event: Event) {
-    this.eventListeners.callListeners(event);
-  }
+  abstract createListener<E extends Event>(listenerBlock: ListenerBlock<E>): Listener<E>;
 
-  createListener<E extends Event>(listenerBlock: ListenerBlock<E>) {
-    return new SafeEventListener(listenerBlock);
-  }
-
-  registerListener<E extends Event, L extends Listener<E>>(eventClass: ClassType<E>, listener: L) {
-    this.eventListeners.addListener(eventClass, listener);
-  }
+  abstract registerListener<E extends Event, L extends Listener<E>>(eventClass: ClassType<E>, listener: L): void;
 
   subscribe<E extends Event>(eventClass: ClassType<E>, handler: ListenerBlock<E>) {
     this.registerListener(eventClass, this.createListener(handler));
@@ -91,6 +84,60 @@ class EventChannel {
   }
 }
 
+class BaseEventChannel extends EventChannel<Event> {
+  constructor(private readonly eventListeners: EventListeners = new EventListeners()) {
+    super(Event);
+  }
+
+  async broadcastEvent<E extends Event>(event: E): Promise<E> {
+    await this.callListeners(event);
+    return event;
+  }
+
+  async callListeners(event: Event) {
+    await this.eventListeners.callListeners(event);
+  }
+
+  createListener<E extends Event>(listenerBlock: ListenerBlock<E>) {
+    return new SafeEventListener(listenerBlock);
+  }
+
+  registerListener<E extends Event, L extends Listener<E>>(eventClass: ClassType<E>, listener: L) {
+    this.eventListeners.addListener(eventClass, listener);
+  }
+}
+
+class FilterEventChannel<BaseEvent extends Event> extends EventChannel<BaseEvent> {
+  constructor(
+    private readonly delegate: EventChannel<BaseEvent>,
+    private readonly _filter: (event: BaseEvent) => Promise<boolean>,
+  ) {
+    super(delegate.baseEventClass);
+  }
+
+  private intercept<E extends Event>(block: ListenerBlockI<E>): (event: E) => Promise<ListeningStatus> {
+    return async (event: E) => {
+      try {
+        const result = event instanceof this.baseEventClass && (await this._filter(event));
+        if (result) {
+          return await block(event);
+        }
+      } catch (err) {
+        return ListeningStatus.LISTENING;
+      }
+      return ListeningStatus.LISTENING;
+    };
+  }
+
+  createListener<E extends Event>(listenerBlock: ListenerBlockI<E>): Listener<E> {
+    return this.delegate.createListener<E>(this.intercept(listenerBlock));
+  }
+
+  registerListener<E extends Event, L extends Listener<E>>(eventClass: ClassType<E>, listener: L): void {
+    return this.delegate.registerListener(eventClass, listener);
+  }
+}
+
 interface Listener<E extends Event> {
   onEvent: ListenerBlock<E>;
 }
@@ -101,6 +148,8 @@ interface CoroutineContext {
 
 type ListenerBlock<E extends Event> = ((event: E) => Promise<ListeningStatus | undefined | null | void>) &
   CoroutineContext;
+
+type ListenerBlockI<E extends Event> = ((event: E) => Promise<ListeningStatus>) & CoroutineContext;
 
 class SafeEventListener<E extends Event> implements Listener<E> {
   constructor(private readonly listenerBlock: ListenerBlock<E>) {}
@@ -121,6 +170,6 @@ class SafeEventListener<E extends Event> implements Listener<E> {
   }
 }
 
-const GlobalEventChannel = new EventChannel();
+const GlobalEventChannel = new BaseEventChannel();
 
 export default GlobalEventChannel;

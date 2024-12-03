@@ -31,14 +31,3 @@ export abstract class AbstractContact implements Contact {
     return Promise.resolve(undefined);
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-type ClearEmptyObject<T> = T extends {} ? (keyof T extends never ? null : T) : T;
-
-type ParseStringTemplate<T extends string> = T extends `${infer _Start}\${${infer Key}}${infer Rest}`
-  ? Key extends string
-    ? { [K in Key]: string } & ParseStringTemplate<Rest>
-    : never
-  : {};
-
-type OpenApiUrlPlaceHolder<T extends string> = ClearEmptyObject<ParseStringTemplate<T>>;
