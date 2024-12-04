@@ -1,9 +1,9 @@
-import { Event } from "./Event";
+import { BaseEvent, Event } from "./Event";
 
 const CoroutineExceptionHandler = Symbol.for("CoroutineExceptionHandler");
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ClassType<T = any> = { new (...args: any[]): T };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-function-type
+type ClassType<T = any> = Function & { prototype: T };
 
 class ListenerRegistry {
   constructor(
@@ -48,11 +48,16 @@ enum ListeningStatus {
   STOPPED,
 }
 
-abstract class EventChannel<BaseEvent extends Event> {
+export abstract class EventChannel<BaseEvent extends Event> {
   constructor(readonly baseEventClass: ClassType<BaseEvent>) {}
 
   filter(filter: (event: BaseEvent) => Promise<boolean>): EventChannel<BaseEvent> {
     return new FilterEventChannel(this, filter);
+  }
+
+  filterIsInstance<E extends Event>(clazz: ClassType<E>): EventChannel<E> {
+    // @ts-ignore
+    return this.filter((it) => Promise.resolve(it instanceof clazz));
   }
 
   abstract createListener<E extends Event>(listenerBlock: ListenerBlock<E>): Listener<E>;
@@ -84,7 +89,7 @@ abstract class EventChannel<BaseEvent extends Event> {
   }
 }
 
-class BaseEventChannel extends EventChannel<Event> {
+export class BaseEventChannel extends EventChannel<Event> {
   constructor(private readonly eventListeners: EventListeners = new EventListeners()) {
     super(Event);
   }
@@ -118,6 +123,7 @@ class FilterEventChannel<BaseEvent extends Event> extends EventChannel<BaseEvent
   private intercept<E extends Event>(block: ListenerBlockI<E>): (event: E) => Promise<ListeningStatus> {
     return async (event: E) => {
       try {
+        // @ts-ignore
         const result = event instanceof this.baseEventClass && (await this._filter(event));
         if (result) {
           return await block(event);
@@ -169,7 +175,3 @@ class SafeEventListener<E extends Event> implements Listener<E> {
     return ListeningStatus.LISTENING;
   }
 }
-
-const GlobalEventChannel = new BaseEventChannel();
-
-export default GlobalEventChannel;

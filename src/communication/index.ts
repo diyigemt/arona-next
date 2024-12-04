@@ -1,3 +1,3 @@
-import GlobalEventChannel from "./event/EventChannel";
+import GlobalEventChannel from "./event/Event";
 
 export default GlobalEventChannel;

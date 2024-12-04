@@ -1,20 +1,21 @@
-// @ts-ignore
 import { Bot } from "../Bot";
 import { MessageChain } from "../message/MessageChain";
+import { BaseEventChannel } from "./EventChannel";
 
 export class Event {
-  broadcast<T extends Event>(): T {
-    // @ts-ignore
-    GlobalEventChannel.broadcastEvent(this);
+  async broadcast<T extends Event>() {
+    await GlobalEventChannel.broadcastEvent(this);
     return this as unknown as T;
   }
 }
 
 export abstract class BaseEvent extends Event {}
 
-export class TencentEvent extends BaseEvent {}
+export abstract class TencentEvent extends BaseEvent {
+  abstract toString(): string;
+}
 
-export class TencentBotEvent extends TencentEvent {
+export abstract class TencentBotEvent extends TencentEvent {
   constructor(readonly bot: Bot) {
     super();
   }
@@ -31,3 +32,7 @@ export abstract class TencentMessageEvent extends TencentBotEvent {
     super(bot);
   }
 }
+
+const GlobalEventChannel = new BaseEventChannel();
+
+export default GlobalEventChannel;

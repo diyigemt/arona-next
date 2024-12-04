@@ -1,7 +1,9 @@
 import { Bot } from "../Bot";
-import { Message, MessageReceipt } from "../message/Message";
+import { Message } from "../message/Message";
 import { Image } from "../message/Image";
 import { MessageChain } from "../message/MessageChain";
+
+import { MessageReceipt } from "../message/MessageReceipt";
 
 export interface Contact {
   id: string;

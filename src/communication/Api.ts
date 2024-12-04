@@ -1,11 +1,28 @@
+import { Contact } from "./contact/Contact";
+import { MessageReceipt } from "./message/MessageReceipt";
+
 export type TencentEndpoint = {
-  Interactions: "/interactions/{interaction_id}";
-  PostFriendMessage: "/v2/users/{openid}/messages";
+  Interactions: {
+    Url: "/interactions/{interaction_id}";
+    Method: "POST";
+    RespType: void;
+  };
+  PostFriendMessage: {
+    Url: "/v2/users/{openid}/messages";
+    Method: "POST";
+    RespType: MessageReceipt<Contact>;
+  };
 };
 
-export const CTencentEndpoint: TencentEndpoint = {
-  Interactions: "/interactions/{interaction_id}",
-  PostFriendMessage: "/v2/users/{openid}/messages",
+export const CTencentEndpoint: { [key in keyof TencentEndpoint]: Omit<TencentEndpoint[key], "RespType"> } = {
+  Interactions: {
+    Url: "/interactions/{interaction_id}",
+    Method: "POST",
+  },
+  PostFriendMessage: {
+    Url: "/v2/users/{openid}/messages",
+    Method: "POST",
+  },
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
