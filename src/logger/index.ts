@@ -4,7 +4,7 @@ import "winston-daily-rotate-file";
 const { format, transports } = winston;
 
 const loggerFormatter: Parameters<typeof format.printf>[0] = ({ level, message, label, timestamp }) => {
-  return `${timestamp} [${label}] ${level}: ${message}`;
+  return `${timestamp} [${label}] ${level}: ${typeof message === "string" ? message : message.toString()}`;
 };
 
 const LoggerCache: { [key: string]: winston.Logger } = {};

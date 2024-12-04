@@ -22,13 +22,14 @@ export class AppController {
       if (body.op === 13) {
         // 验签
         const dataSign = bot.webhookSign(Buffer.from(body.d.event_ts + body.d.plain_token));
-        return {
+        return resp.status(200).send({
           plain_token: body.d.plain_token,
           signature: dataSign.toString("hex"),
-        } as TencentWebhookChallengeResp;
+        } as TencentWebhookChallengeResp);
       }
       // 发送数据
-      bot.logger.info(body);
+      bot.logger.info(JSON.stringify(body));
+      return resp.status(204).send();
     }
     return resp.status(400).send();
   }
