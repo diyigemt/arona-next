@@ -19,7 +19,10 @@ export class GroupMessagePostSendEvent extends MessagePostSendEvent<Contact> {
   ) {
     super(target.bot);
   }
+
   toString(): string {
     return `Group(${this.receipt.id}) <- ${this.message}`;
   }
+
+  eventId: string = "";
 }

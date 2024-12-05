@@ -1,7 +1,5 @@
-import { MessageChain } from "../message/MessageChain";
-
 export interface WebhookBody<T> {
-  id?: string; // 未知id, 目前只有interactions下发伴随的id有用, 需要调用openapi的接口通知后台消息处理结果
+  id: string; // 未知id, 目前只有interactions下发伴随的id有用, 需要调用openapi的接口通知后台消息处理结果
   op: 0 | 13; // 0: 正常消息 13: 客户端密钥challenge
   t: WebhookEventTypes;
   d: T; // 具体消息体
@@ -76,6 +74,15 @@ export enum CallbackButtonChatType {
   Friend = 2, // 私聊
 }
 
+export enum OpenapiMessagePostType {
+  PLAIN_TEXT = 0, // 纯文本
+  IMAGE = 1, // 图文
+  MARKDOWN = 2, // markdown
+  ARK = 3, // 卡片
+  EMBED = 4, // 小程序
+  FILE = 7, // 文件
+}
+
 export interface EventRaw {
   id: string;
 }
@@ -143,6 +150,12 @@ export interface MessageArkObj {
 export interface MessageArkObjKv {
   key: string;
   value: string;
+}
+
+export interface MessageMediaInfo {
+  file_info: string;
+  file_uuid: string;
+  ttl: number;
 }
 
 export interface MessageReference {
@@ -249,4 +262,17 @@ export interface GuildChannelRaw extends ContactRaw {
   application_id: GuildChannelApplicationType;
   // https://bot.q.qq.com/wiki/develop/api-v2/server-inter/channel/role-group/channel_permissions/model.html#Permissions
   permissions: string;
+}
+
+export interface Resource {
+  resourceId: string;
+  resourceUuid: string;
+  ttl: number;
+  size: number;
+}
+
+interface Image extends Resource {
+  height: number;
+  width: number;
+  url: string;
 }

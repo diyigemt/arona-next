@@ -92,8 +92,10 @@ export class FriendMessageEvent extends MessageEvent implements FriendEvent {
   ) {
     super(sender.bot, message);
   }
+
   subject: Contact = this.sender;
   friend: Friend = this.sender;
+
   toString(): string {
     return `[Friend(${this.subject.id})] ${this.sender.id} -> ${this.message}`;
   }
@@ -107,8 +109,10 @@ export class GroupMessageEvent extends MessageEvent implements GroupEvent {
   ) {
     super(sender.bot, message);
   }
+
   subject: Contact = this.sender.group;
   group: Group = this.sender.group;
+
   toString(): string {
     return `[Group(${this.subject.id})] ${this.sender.id} -> ${this.message}`;
   }

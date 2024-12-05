@@ -1,4 +1,4 @@
-import { BaseEvent, Event } from "./Event";
+import { Event } from "./Event";
 
 const CoroutineExceptionHandler = Symbol.for("CoroutineExceptionHandler");
 

@@ -14,7 +14,10 @@ export class GroupMessagePreSendEvent extends MessagePreSendEvent {
   ) {
     super(target.bot);
   }
+
   toString(): string {
     return `GroupMessagePreSendEvent(message=${this.message})`;
   }
+
+  eventId: string = "";
 }

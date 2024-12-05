@@ -5,7 +5,7 @@ export interface MessageChain extends Message, Array<Message> {
   eventId?: string;
 }
 
-class MessageChainImpl extends Array<Message> implements MessageChain {
+export class MessageChainImpl extends Array<Message> implements MessageChain {
   constructor(
     readonly sourceId: string,
     readonly eventId?: string,

@@ -5,9 +5,12 @@ export class BotAuthorizationSuccessEvent extends BotEvent {
   constructor(readonly bot: Bot) {
     super(bot);
   }
+
   toString(): string {
     return `BotAuthorizationSuccessEvent(bot=${this.bot.id})`;
   }
+
+  eventId: string = "";
 }
 
 export class BotOnlineEvent extends BotEvent {
@@ -18,4 +21,6 @@ export class BotOnlineEvent extends BotEvent {
   toString(): string {
     return `BotOnlineEvent(bot=${this.bot.id})`;
   }
+
+  eventId: string = "";
 }

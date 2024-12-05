@@ -19,6 +19,7 @@ import {
   GuildMember,
 } from "../types/Contact";
 import { GuildChannelRaw, GuildMemberRaw, GuildRaw } from "../types/Message";
+import { Nullable } from "../types/Helper";
 
 export abstract class AbstractContact implements Contact {
   abstract id: string;
@@ -42,7 +43,7 @@ export abstract class AbstractContact implements Contact {
       error?: Error,
       receipt?: MessageReceipt<C>,
     ) => MessagePostSendEvent<C>,
-  ): Promise<MessageReceipt<C> | null> {
+  ): Promise<Nullable<MessageReceipt<C>>> {
     let messagePreSendEvent: MessagePreSendEvent;
     try {
       messagePreSendEvent = await preSendEventConstructor(this as unknown as C, body).broadcast();
@@ -122,8 +123,12 @@ export class GuildMemberImpl extends AbstractContact implements GuildMember {
   }
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
 
-  asGuildChannelMember(channelId: string): GuildChannelMember {
-    return undefined;
+  asGuildChannelMember(channelOrId: string | GuildChannel): GuildChannelMember {
+    if (typeof channelOrId === "string") {
+      const channel = this.guild.channels.getOrCreate(channelOrId);
+      return new GuildChannelMemberImpl(this.id, channel, null);
+    }
+    return new GuildChannelMemberImpl(this.id, channelOrId, null);
   }
 
   sendMessage(message: string | Message | MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>> {
@@ -144,8 +149,8 @@ export class GuildChannelMemberImpl extends AbstractContact implements GuildChan
   guild: Guild = this.channel.guild;
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
 
-  asGuildChannelMember(channelId: string): GuildChannelMember {
-    return undefined;
+  asGuildChannelMember(channelOrId: string | GuildChannel): GuildChannelMember {
+    return this;
   }
 
   sendMessage(message: string | Message | MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>> {

@@ -43,7 +43,7 @@ export interface GuildChannel extends Contact {
 // 频道成员, 无法直接聊天, 需要转换为GuildChannelMember
 export interface GuildMember extends Contact {
   guild: Guild;
-  asGuildChannelMember(channelId: string): GuildChannelMember;
+  asGuildChannelMember(channelOrId: string | GuildChannel): GuildChannelMember;
 }
 
 export interface GuildChannelMember extends GuildMember {
