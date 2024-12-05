@@ -1,4 +1,4 @@
-import { Contact } from "../contact/Contact";
+import { Contact } from "../types/Contact";
 
 export class MessageReceipt<C extends Contact> {
   constructor(

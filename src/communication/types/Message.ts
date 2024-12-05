@@ -82,7 +82,7 @@ export interface EventRaw {
 
 export interface ContactRaw {
   id: string;
-  union_openid: string;
+  union_openid?: string;
 }
 
 export interface GroupMessageEventAuthorRaw extends ContactRaw {

@@ -1,7 +1,7 @@
 import { BotEvent } from "./Event";
-import { Contact } from "../contact/Contact";
 import { MessageChain } from "../message/MessageChain";
 import { MessageReceipt } from "../message/MessageReceipt";
+import { Contact } from "../types/Contact";
 
 export abstract class MessagePostSendEvent<C extends Contact> extends BotEvent {
   abstract target: C;

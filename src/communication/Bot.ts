@@ -1,4 +1,3 @@
-import { Contact } from "./contact/Contact";
 import { Message } from "./message/Message";
 import { Image } from "./message/Image";
 import { MessageChain } from "./message/MessageChain";
@@ -13,6 +12,8 @@ import { MessageReceipt } from "./message/MessageReceipt";
 import { ed25519 } from "@noble/curves/ed25519";
 import BotManager from "./BotManager";
 import { COpenapiEndpoint, OpenApiUrlPlaceHolder, OpenapiEndpoint } from "./types/Openapi";
+import { Contact, ContactList, Friend, Group, Guild } from "./types/Contact";
+import { FriendImpl, GroupImpl, GuildImpl } from "./contact/Contact";
 
 export class Bot implements Contact {
   constructor(private readonly config: BotConfig) {
@@ -34,6 +35,9 @@ export class Bot implements Contact {
   unionOpenidOrId: string = this.config.id;
   httpClient: AxiosInstance;
   logger = NodeSimpleLogger(`Bot.${this.config.id}`);
+  friends = new ContactList<Friend>((id: string) => new FriendImpl(id, this));
+  groups = new ContactList<Group>((id: string) => new GroupImpl(id, this));
+  guilds = new ContactList<Guild>((id: string) => new GuildImpl(id, this, null));
   private accessTokenCoroutine: NodeJS.Timeout | null;
   private accessToken: string = "";
   private webhookPrivateKey = Buffer.from(this.config.secret.repeat(2).slice(0, 32));

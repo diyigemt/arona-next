@@ -1,6 +1,6 @@
 import { BotEvent } from "./Event";
-import { Contact } from "../contact/Contact";
 import { Message } from "../message/Message";
+import { Contact } from "../types/Contact";
 
 export abstract class MessagePreSendEvent extends BotEvent {
   abstract target: Contact;

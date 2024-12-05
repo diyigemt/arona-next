@@ -1,5 +1,6 @@
 import { MessageReceipt } from "../message/MessageReceipt";
-import { Contact } from "../contact/Contact";
+
+import { Contact } from "./Contact";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type ClearEmptyObject<T> = T extends {} ? (keyof T extends never ? null : T) : T;
@@ -23,6 +24,7 @@ export type OpenapiEndpoint = {
     RespType: MessageReceipt<Contact>;
   };
 };
+export type OpenapiMessageEndpoint = Omit<OpenapiEndpoint, "Interactions">;
 export const COpenapiEndpoint: { [key in keyof OpenapiEndpoint]: Omit<OpenapiEndpoint[key], "RespType"> } = {
   Interactions: {
     Url: "/interactions/{interaction_id}",
