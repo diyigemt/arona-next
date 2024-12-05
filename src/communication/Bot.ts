@@ -2,17 +2,17 @@ import { Contact } from "./contact/Contact";
 import { Message } from "./message/Message";
 import { Image } from "./message/Image";
 import { MessageChain } from "./message/MessageChain";
-import { CTencentEndpoint, OpenApiUrlPlaceHolder, TencentEndpoint } from "./Api";
 import axios, { AxiosInstance } from "axios";
-import GlobalEventChannel, { TencentBotEvent } from "./event/Event";
+import GlobalEventChannel, { BotEvent } from "./event/Event";
 import { EventChannel } from "./event/EventChannel";
-import { TencentOpenApiAuthorizationReq, TencentOpenApiAuthorizationResp } from "./types/Authorization";
+import { OpenApiAuthorizationReq, OpenApiAuthorizationResp } from "./types/Authorization";
 import { NodeSimpleLogger } from "../logger";
-import { TencentBotAuthorizationSuccessEvent, TencentBotOnlineEvent } from "./event/AuthorizationEvent";
+import { BotAuthorizationSuccessEvent, BotOnlineEvent } from "./event/AuthorizationEvent";
 import { BotConfig } from "../types";
 import { MessageReceipt } from "./message/MessageReceipt";
 import { ed25519 } from "@noble/curves/ed25519";
 import BotManager from "./BotManager";
+import { COpenapiEndpoint, OpenApiUrlPlaceHolder, OpenapiEndpoint } from "./types/Openapi";
 
 export class Bot implements Contact {
   constructor(private readonly config: BotConfig) {
@@ -23,7 +23,7 @@ export class Bot implements Contact {
       },
     });
     if (config.debugMode) {
-      this.eventChannel.subscribeAlways(TencentBotEvent, async (ev) => {
+      this.eventChannel.subscribeAlways(BotEvent, async (ev) => {
         this.logger.info(ev.toString());
       });
     }
@@ -38,16 +38,16 @@ export class Bot implements Contact {
   private accessToken: string = "";
   private webhookPrivateKey = Buffer.from(this.config.secret.repeat(2).slice(0, 32));
   private webhookPublicKey = ed25519.getPublicKey(this.webhookPrivateKey);
-  eventChannel: EventChannel<TencentBotEvent> = GlobalEventChannel.filterIsInstance(TencentBotEvent).filter(
+  eventChannel: EventChannel<BotEvent> = GlobalEventChannel.filterIsInstance(BotEvent).filter(
     async (it) => it.bot === this,
   );
 
-  callOpenApi<EP extends keyof TencentEndpoint, T extends TencentEndpoint[EP]["RespType"]>(
+  callOpenApi<EP extends keyof OpenapiEndpoint, T extends OpenapiEndpoint[EP]["RespType"]>(
     endpoint: EP,
-    urlPlaceHolder: OpenApiUrlPlaceHolder<TencentEndpoint[EP]["Url"]>,
+    urlPlaceHolder: OpenApiUrlPlaceHolder<OpenapiEndpoint[EP]["Url"]>,
     config: axios.AxiosRequestConfig = {},
   ): Promise<T> {
-    const mapper = CTencentEndpoint[endpoint];
+    const mapper = COpenapiEndpoint[endpoint];
     const url = `https://${this.config.debugMode ? "sandbox." : ""}api.sgroup.qq.com${mapper.Url}`;
     Object.keys(urlPlaceHolder).forEach((k) => {
       if (endpoint.includes(k)) {
@@ -87,8 +87,8 @@ export class Bot implements Contact {
   }
 
   login() {
-    this.eventChannel.subscribeOnce(TencentBotAuthorizationSuccessEvent, async () => {
-      new TencentBotOnlineEvent(this).broadcast().then();
+    this.eventChannel.subscribeOnce(BotAuthorizationSuccessEvent, async () => {
+      new BotOnlineEvent(this).broadcast().then();
       BotManager.registerBot(this);
     });
     this.startUpdateAccessTokenCoroutine();
@@ -99,7 +99,7 @@ export class Bot implements Contact {
     this.getAccessToken()
       .then((resp) => {
         this.accessToken = resp.access_token;
-        new TencentBotAuthorizationSuccessEvent(this).broadcast().then();
+        new BotAuthorizationSuccessEvent(this).broadcast().then();
         this.accessTokenCoroutine = setTimeout(
           () => {
             this.startUpdateAccessTokenCoroutine();
@@ -110,17 +110,17 @@ export class Bot implements Contact {
       .catch();
   }
 
-  private async getAccessToken(): Promise<TencentOpenApiAuthorizationResp> {
-    const data: TencentOpenApiAuthorizationReq = {
+  private async getAccessToken(): Promise<OpenApiAuthorizationResp> {
+    const data: OpenApiAuthorizationReq = {
       appId: this.config.appId,
       clientSecret: this.config.secret,
     };
-    return new Promise<TencentOpenApiAuthorizationResp>((resolve, reject) => {
+    return new Promise<OpenApiAuthorizationResp>((resolve, reject) => {
       this.httpClient
         .post("https://bots.qq.com/app/getAppAccessToken", data)
         .then((resp) => {
           if (resp.status === 200 && resp.data.access_token) {
-            resolve(resp.data as TencentOpenApiAuthorizationResp);
+            resolve(resp.data as OpenApiAuthorizationResp);
           } else {
             this.logger.warn("request app access token failed");
             reject(resp);

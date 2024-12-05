@@ -1,21 +1,21 @@
-import { TencentBotEvent } from "./Event";
+import { BotEvent } from "./Event";
 import { Bot } from "../Bot";
 
-export class TencentBotAuthorizationSuccessEvent extends TencentBotEvent {
+export class BotAuthorizationSuccessEvent extends BotEvent {
   constructor(readonly bot: Bot) {
     super(bot);
   }
   toString(): string {
-    return `TencentBotAuthorizationSuccessEvent(bot=${this.bot.id})`;
+    return `BotAuthorizationSuccessEvent(bot=${this.bot.id})`;
   }
 }
 
-export class TencentBotOnlineEvent extends TencentBotEvent {
+export class BotOnlineEvent extends BotEvent {
   constructor(readonly bot: Bot) {
     super(bot);
   }
 
   toString(): string {
-    return `TencentBotOnlineEvent(bot=${this.bot.id})`;
+    return `BotOnlineEvent(bot=${this.bot.id})`;
   }
 }

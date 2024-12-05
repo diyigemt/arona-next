@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Post, RawBody, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import BotManager from "./communication/BotManager";
 import { FastifyRequest, FastifyReply } from "fastify";
-import { TencentWebhookBody } from "./communication/types/Message";
-import { TencentWebhookChallengeReq, TencentWebhookChallengeResp } from "./communication/types/Authorization";
+import { WebhookBody } from "./communication/types/Message";
+import { WebhookChallengeReq, WebhookChallengeResp } from "./communication/types/Authorization";
 
 @Controller("/webhook")
 export class AppController {
@@ -18,14 +18,14 @@ export class AppController {
       if (!verify) {
         return resp.status(400);
       }
-      const body = req.body as TencentWebhookBody<TencentWebhookChallengeReq>;
+      const body = req.body as WebhookBody<WebhookChallengeReq>;
       if (body.op === 13) {
         // 验签
         const dataSign = bot.webhookSign(Buffer.from(body.d.event_ts + body.d.plain_token));
         return resp.status(200).send({
           plain_token: body.d.plain_token,
           signature: dataSign.toString("hex"),
-        } as TencentWebhookChallengeResp);
+        } as WebhookChallengeResp);
       }
       // 发送数据
       bot.logger.info(JSON.stringify(body));

@@ -1,5 +1,3 @@
-import { Contact } from "../contact/Contact";
-
 export interface Message {
   toString(): string;
 

@@ -1,6 +1,7 @@
 import { Bot } from "../Bot";
 import { MessageChain } from "../message/MessageChain";
 import { BaseEventChannel } from "./EventChannel";
+import { GuildChannelType } from "../types/Message";
 
 export class Event {
   async broadcast<T extends Event>() {
@@ -11,17 +12,17 @@ export class Event {
 
 export abstract class BaseEvent extends Event {}
 
-export abstract class TencentEvent extends BaseEvent {
+export abstract class AbstractEvent extends BaseEvent {
   abstract toString(): string;
 }
 
-export abstract class TencentBotEvent extends TencentEvent {
+export abstract class BotEvent extends AbstractEvent {
   constructor(readonly bot: Bot) {
     super();
   }
 }
 
-export abstract class TencentMessageEvent extends TencentBotEvent {
+export abstract class MessageEvent extends BotEvent {
   abstract subject: string;
   abstract sender: string;
 
@@ -31,6 +32,9 @@ export abstract class TencentMessageEvent extends TencentBotEvent {
   ) {
     super(bot);
   }
+}
+
+export abstract class GuildEvent extends BotEvent {
 }
 
 const GlobalEventChannel = new BaseEventChannel();
