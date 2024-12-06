@@ -1,7 +1,8 @@
 import { BotEvent } from "./Event";
 import { MessageChain } from "../message/MessageChain";
 import { MessageReceipt } from "../message/MessageReceipt";
-import { Contact } from "../types/Contact";
+import { Contact, Group } from "../types/Contact";
+import { Message } from "../message/Message";
 
 export abstract class MessagePostSendEvent<C extends Contact> extends BotEvent {
   abstract target: C;
@@ -10,12 +11,16 @@ export abstract class MessagePostSendEvent<C extends Contact> extends BotEvent {
   abstract receipt?: MessageReceipt<C>;
 }
 
+export type MessagePostSendEventConstructor<C extends Contact> = {
+  new (target: C, message: MessageChain, exception?: Error, receipt?: MessageReceipt<C>): MessagePostSendEvent<C>;
+};
+
 export class GroupMessagePostSendEvent extends MessagePostSendEvent<Contact> {
   constructor(
-    readonly target: Contact,
+    readonly target: Group,
     readonly message: MessageChain,
     readonly exception?: Error,
-    readonly receipt?: MessageReceipt<Contact>,
+    readonly receipt?: MessageReceipt<Group>,
   ) {
     super(target.bot);
   }

@@ -83,6 +83,13 @@ export enum OpenapiMessagePostType {
   FILE = 7, // 文件
 }
 
+export enum RichMessageType {
+  IMAGE = 1, // 图片
+  VIDEO = 2, // 视频
+  VOICE = 3, // 语音
+  FILE = 4, // 文件
+}
+
 export interface EventRaw {
   id: string;
 }
@@ -171,6 +178,7 @@ export interface MessageEventRaw extends EventRaw {
 }
 
 export interface GroupMessageEventRaw extends MessageEventRaw {
+  group_openid: string;
   author: GroupMessageEventAuthorRaw;
 }
 
@@ -269,10 +277,4 @@ export interface Resource {
   resourceUuid: string;
   ttl: number;
   size: number;
-}
-
-interface Image extends Resource {
-  height: number;
-  width: number;
-  url: string;
 }

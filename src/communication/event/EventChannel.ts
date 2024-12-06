@@ -1,9 +1,7 @@
 import { Event } from "./Event";
+import { ClassType } from "../types/Helper";
 
 const CoroutineExceptionHandler = Symbol.for("CoroutineExceptionHandler");
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-function-type
-type ClassType<T = any> = Function & { prototype: T };
 
 class ListenerRegistry {
   constructor(
@@ -18,7 +16,7 @@ class EventListeners {
   async callListeners(event: Event) {
     for (const it of this.container) {
       if (!(event instanceof it.type)) {
-        return;
+        continue;
       }
       await this.process(this.container, it, it.listener, event);
     }

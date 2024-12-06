@@ -1,8 +1,8 @@
-import { Message } from "./message/Message";
+import { Message, PlainText } from "./message/Message";
 import { Image } from "./message/Image";
-import { MessageChain } from "./message/MessageChain";
+import { MessageChain, MessageChainBuilder } from "./message/MessageChain";
 import axios, { AxiosInstance } from "axios";
-import GlobalEventChannel, { BotEvent } from "./event/Event";
+import GlobalEventChannel, { BotEvent, GroupMessageEvent, MessageEvent } from "./event/Event";
 import { EventChannel } from "./event/EventChannel";
 import { OpenApiAuthorizationReq, OpenApiAuthorizationResp } from "./types/Authorization";
 import { NodeSimpleLogger } from "../logger";
@@ -11,7 +11,7 @@ import { BotConfig } from "../types";
 import { MessageReceipt } from "./message/MessageReceipt";
 import { ed25519 } from "@noble/curves/ed25519";
 import BotManager from "./BotManager";
-import { COpenapiEndpoint, OpenApiUrlPlaceHolder, OpenapiEndpoint } from "./types/Openapi";
+import { COpenapiEndpoint, OpenApiUrlPlaceHolder, OpenapiEndpoint, OpenapiNeedData } from "./types/Openapi";
 import { Contact, ContactList, Friend, Group, Guild } from "./types/Contact";
 import { FriendImpl, GroupImpl, GuildImpl } from "./contact/Contact";
 
@@ -26,6 +26,11 @@ export class Bot implements Contact {
     if (config.debugMode) {
       this.eventChannel.subscribeAlways(BotEvent, async (ev) => {
         this.logger.info(ev.toString());
+      });
+      this.eventChannel.subscribeAlways(GroupMessageEvent, async (ev) => {
+        const mcb = MessageChainBuilder(ev.message.sourceId, ev.eventId);
+        mcb.append("recv: " + ev.message.filter((it) => it instanceof PlainText).join(""));
+        ev.subject.sendMessage(mcb.build(), 1).then();
       });
     }
   }
@@ -46,32 +51,37 @@ export class Bot implements Contact {
     async (it) => it.bot === this,
   );
 
-  callOpenApi<EP extends keyof OpenapiEndpoint, T extends OpenapiEndpoint[EP]["RespType"]>(
+  async callOpenApi<
+    EP extends keyof OpenapiEndpoint,
+    Req extends OpenapiNeedData<EP>,
+    Resp extends OpenapiEndpoint[EP]["RespType"],
+  >(
     endpoint: EP,
     urlPlaceHolder: OpenApiUrlPlaceHolder<OpenapiEndpoint[EP]["Url"]>,
+    data: Req,
     config: axios.AxiosRequestConfig = {},
-  ): Promise<T> {
+  ): Promise<Resp> {
     const mapper = COpenapiEndpoint[endpoint];
-    const url = `https://${this.config.debugMode ? "sandbox." : ""}api.sgroup.qq.com${mapper.Url}`;
+    let url = `https://${this.config.debugMode ? "sandbox." : ""}api.sgroup.qq.com${mapper.Url}`;
     Object.keys(urlPlaceHolder).forEach((k) => {
-      if (endpoint.includes(k)) {
-        endpoint.replace(k, Reflect.get(urlPlaceHolder, k) as string);
+      if (url.includes(k)) {
+        url = url.replace(`{${k}}`, Reflect.get(urlPlaceHolder, k) as string);
       }
     });
-    return this.httpClient
-      .request(
-        Object.assign(config, {
-          url,
-          method: mapper.Method,
-          headers: {
-            Authorization: "",
-            "X-Union-Appid": this.config.id,
-          },
-        }),
-      )
-      .then((resp) => {
-        return resp.data as T;
-      });
+    const cfg = Object.assign(config, {
+      url,
+      method: mapper.Method,
+      headers: {
+        Authorization: `QQBot ${this.accessToken}`,
+        "X-Union-Appid": this.config.id,
+      },
+    });
+    if (data) {
+      cfg.data = data;
+    }
+    return this.httpClient.request(cfg).then((resp) => {
+      return resp.data as Resp;
+    });
   }
 
   webhookVerify(body: Buffer, sign: Buffer) {

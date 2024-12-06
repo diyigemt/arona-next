@@ -3,6 +3,6 @@ bot:
   appId: ""
   token: ""
   secret: ""
-  debug: false
+  debugMode: false
 web:
   port: 8080

@@ -1,9 +1,7 @@
 import { Bot } from "../Bot";
 import { MessageChain } from "../message/MessageChain";
 import { BaseEventChannel } from "./EventChannel";
-import { GuildChannelType } from "../types/Message";
-import { Contact, Friend, Group, GroupMember, Guild, GuildChannel, GuildChannelMember } from "../types/Contact";
-import { Message } from "../message/Message";
+import { Contact, Friend, Group, GroupMember, Guild, GuildChannelMember } from "../types/Contact";
 
 export class Event {
   async broadcast<T extends Event>() {

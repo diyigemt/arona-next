@@ -10,7 +10,9 @@ export interface Contact {
   unionOpenid?: string;
   unionOpenidOrId: string;
 
-  sendMessage(message: string | Message | MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>>;
+  sendMessage(message: string, messageSequence: number): Promise<MessageReceipt<Contact>>;
+  sendMessage(message: Message, messageSequence: number): Promise<MessageReceipt<Contact>>;
+  sendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>>;
 
   uploadImage(dataLike: string | Buffer): Promise<Image>;
 }

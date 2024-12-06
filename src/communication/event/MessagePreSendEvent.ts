@@ -1,15 +1,19 @@
 import { BotEvent } from "./Event";
 import { Message } from "../message/Message";
-import { Contact } from "../types/Contact";
+import { Contact, Group } from "../types/Contact";
 
 export abstract class MessagePreSendEvent extends BotEvent {
   abstract target: Contact;
   abstract message: Message;
 }
 
+export type MessagePreSendEventConstructor<C extends Contact> = {
+  new (contact: C, message: Message): MessagePreSendEvent;
+};
+
 export class GroupMessagePreSendEvent extends MessagePreSendEvent {
   constructor(
-    readonly target: Contact,
+    readonly target: Group,
     readonly message: Message,
   ) {
     super(target.bot);

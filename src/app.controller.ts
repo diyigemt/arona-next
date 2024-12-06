@@ -3,6 +3,7 @@ import BotManager from "./communication/BotManager";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { WebhookBody } from "./communication/types/Message";
 import { WebhookChallengeReq, WebhookChallengeResp } from "./communication/types/Authorization";
+import EventDispatcher from "./communication/EventDispatcher";
 
 @Controller("/webhook")
 export class AppController {
@@ -12,6 +13,10 @@ export class AppController {
     const sign = req.headers["x-signature-ed25519"];
     const ts = req.headers["x-signature-timestamp"];
     const bot = BotManager.getBot();
+    // TODO Remove
+    if (!bot) {
+      return resp.status(204).send();
+    }
     if (sign && typeof sign === "string" && ts && typeof ts === "string" && rawBody) {
       const verifyBody = Buffer.concat([Buffer.from(ts), Buffer.from(JSON.stringify(rawBody))]);
       const verify = bot.webhookVerify(verifyBody, Buffer.from(sign, "hex"));
@@ -29,6 +34,9 @@ export class AppController {
       }
       // 发送数据
       bot.logger.info(JSON.stringify(body));
+      setTimeout(() => {
+        EventDispatcher.dispatch(bot, body.t, body);
+      });
       return resp.status(204).send();
     }
     return resp.status(400).send();
