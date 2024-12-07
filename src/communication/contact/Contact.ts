@@ -1,6 +1,6 @@
 import { Bot } from "../Bot";
 import { Message, PlainText } from "../message/Message";
-import { AbstractImage, Image } from "../message/Image";
+import { AbstractImage, Image, OfflineImage, OnlineImage } from "../message/Image";
 import { MessageChain, MessageChainImpl } from "../message/MessageChain";
 
 import { MessageReceipt } from "../message/MessageReceipt";
@@ -27,7 +27,7 @@ import {
   GuildChannelMember,
   GuildMember,
 } from "../types/Contact";
-import { GuildChannelRaw, GuildMemberRaw, GuildRaw, OpenapiMessagePostType } from "../types/Message";
+import { GuildChannelRaw, GuildMemberRaw, GuildRaw, OpenapiMessagePostType, RichMessageType } from "../types/Message";
 
 function MessageToMessageChain(message: Message): MessageChain {
   if (message instanceof MessageChainImpl) {
@@ -85,8 +85,88 @@ export abstract class AbstractContact implements Contact {
 
   protected abstract doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>>;
 
-  uploadImage(dataLike: string | Buffer): Promise<Image> {
+  async uploadImage(dataLike: string | Buffer): Promise<Image> {
+    if (typeof dataLike !== "string") {
+      return await this.uploadBufferImage(dataLike);
+    }
+    if (this instanceof FriendImpl) {
+      return await this.bot
+        .callOpenApi(
+          "PostFriendRichMessage",
+          {
+            openid: this.id,
+          },
+          {
+            url: dataLike,
+            file_type: RichMessageType.IMAGE,
+            srv_send_msg: false,
+          },
+        )
+        .then((resp) => {
+          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, "");
+        });
+    } else if (this instanceof GroupImpl) {
+      return await this.bot
+        .callOpenApi(
+          "PostGroupRichMessage",
+          {
+            group_openid: this.id,
+          },
+          {
+            url: dataLike,
+            file_type: RichMessageType.IMAGE,
+            srv_send_msg: false,
+          },
+        )
+        .then((resp) => {
+          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, "");
+        });
+    } else {
+      new OnlineImage("", "", 0, dataLike);
+    }
     return Promise.resolve(undefined);
+  }
+
+  private async uploadBufferImage(data: Buffer): Promise<Image> {
+    if (!data) {
+      return Promise.reject(new Error("unable to upload null data"));
+    }
+    const base64Encoded = data.toString("base64");
+    if (this instanceof FriendImpl) {
+      return await this.bot
+        .callOpenApi(
+          "PostFriendRichMessage",
+          {
+            openid: this.id,
+          },
+          {
+            file_data: base64Encoded,
+            file_type: RichMessageType.IMAGE,
+            srv_send_msg: false,
+          },
+        )
+        .then((resp) => {
+          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, "");
+        });
+    } else if (this instanceof GroupImpl) {
+      return await this.bot
+        .callOpenApi(
+          "PostGroupRichMessage",
+          {
+            group_openid: this.id,
+          },
+          {
+            file_data: base64Encoded,
+            file_type: RichMessageType.IMAGE,
+            srv_send_msg: false,
+          },
+        )
+        .then((resp) => {
+          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, "");
+        });
+    } else {
+      return Promise.resolve(new OfflineImage(data));
+    }
   }
 }
 
@@ -242,12 +322,20 @@ function MessageChainToOpenapiPostData(messageChain: MessageChain, messageSequen
     .filter((it) => it instanceof PlainText)
     .map((it) => it.toString())
     .join("\n");
-  const im = messageChain.filter((it) => it instanceof AbstractImage);
-  return {
+  const toSend: OpenapiGroupMessagePost = {
     content,
     msg_type: OpenapiMessagePostType.PLAIN_TEXT,
     msg_id: messageChain.sourceId,
     event_id: messageChain.eventId,
     msg_seq: messageSequence,
-  } as OpenapiGroupMessagePost;
+  };
+  const im = messageChain.filter((it) => it instanceof AbstractImage);
+  if (im.length > 0) {
+    toSend.msg_type = OpenapiMessagePostType.FILE;
+    const image = im[im.length - 1];
+    toSend.media = {
+      file_info: image.resourceId,
+    };
+  }
+  return toSend;
 }

@@ -11,6 +11,7 @@ import {
   RichMessageType,
 } from "./Message";
 import { Nullable } from "./Helper";
+import { CallbackButtonRespType } from "../message/CallbackButton";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type ClearEmptyObject<T> = T extends {} ? (keyof T extends never ? null : T) : T;
@@ -22,16 +23,16 @@ type ParseStringTemplate<T extends string> = T extends `${infer _Start}{${infer 
   : {};
 
 export type OpenApiUrlPlaceHolder<T extends string> = ClearEmptyObject<ParseStringTemplate<T>>;
-export type OpenapiNeedData<EP extends keyof OpenapiEndpoint> = OpenapiEndpoint[EP]["Method"] extends "POST"
-  ? OpenapiEndpoint[EP]["ReqType"] extends {}
+export type OpenapiNeedData<EP extends keyof OpenapiEndpoint> = OpenapiEndpoint[EP]["Method"] extends "GET"
+  ? null
+  : OpenapiEndpoint[EP]["ReqType"] extends {}
     ? OpenapiEndpoint[EP]["ReqType"]
-    : null
-  : null;
+    : null;
 export type OpenapiEndpoint = {
   Interactions: {
     Url: "/interactions/{interaction_id}";
-    Method: "POST";
-    ReqType: void;
+    Method: "PUT";
+    ReqType: InteractionNotifyPut;
     RespType: void;
   };
   PostFriendMessage: {
@@ -100,7 +101,7 @@ export const COpenapiEndpoint: { [key in keyof OpenapiEndpoint]: Omit<OpenapiEnd
   {
     Interactions: {
       Url: "/interactions/{interaction_id}",
-      Method: "POST",
+      Method: "PUT",
     },
     PostFriendMessage: {
       Url: "/v2/users/{openid}/messages",
@@ -161,7 +162,7 @@ export interface OpenapiGuildMessagePost extends OpenapiMessagePost {
 }
 
 export interface OpenapiGroupMessagePost extends OpenapiMessagePost {
-  media?: MessageMediaInfo;
+  media?: Pick<MessageMediaInfo, "file_info">;
   msg_type: OpenapiMessagePostType;
 }
 
@@ -172,4 +173,8 @@ export interface RichMessagePost {
   file_type: RichMessageType;
   srv_send_msg: boolean;
   file_data?: string;
+}
+
+export interface InteractionNotifyPut {
+  code: CallbackButtonRespType;
 }

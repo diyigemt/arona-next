@@ -2,7 +2,6 @@ import { BotEvent } from "./Event";
 import { MessageChain } from "../message/MessageChain";
 import { MessageReceipt } from "../message/MessageReceipt";
 import { Contact, Group } from "../types/Contact";
-import { Message } from "../message/Message";
 
 export abstract class MessagePostSendEvent<C extends Contact> extends BotEvent {
   abstract target: C;
@@ -26,7 +25,7 @@ export class GroupMessagePostSendEvent extends MessagePostSendEvent<Contact> {
   }
 
   toString(): string {
-    return `Group(${this.receipt.id}) <- ${this.message}`;
+    return `Group(${this.target.id}) <- ${this.message}`;
   }
 
   eventId: string = "";

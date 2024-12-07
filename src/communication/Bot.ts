@@ -14,6 +14,7 @@ import BotManager from "./BotManager";
 import { COpenapiEndpoint, OpenApiUrlPlaceHolder, OpenapiEndpoint, OpenapiNeedData } from "./types/Openapi";
 import { Contact, ContactList, Friend, Group, Guild } from "./types/Contact";
 import { FriendImpl, GroupImpl, GuildImpl } from "./contact/Contact";
+import { initService } from "../service";
 
 export class Bot implements Contact {
   constructor(private readonly config: BotConfig) {
@@ -26,11 +27,6 @@ export class Bot implements Contact {
     if (config.debugMode) {
       this.eventChannel.subscribeAlways(BotEvent, async (ev) => {
         this.logger.info(ev.toString());
-      });
-      this.eventChannel.subscribeAlways(GroupMessageEvent, async (ev) => {
-        const mcb = MessageChainBuilder(ev.message.sourceId, ev.eventId);
-        mcb.append("recv: " + ev.message.filter((it) => it instanceof PlainText).join(""));
-        ev.subject.sendMessage(mcb.build(), 1).then();
       });
     }
   }
@@ -104,6 +100,7 @@ export class Bot implements Contact {
     this.eventChannel.subscribeOnce(BotAuthorizationSuccessEvent, async () => {
       new BotOnlineEvent(this).broadcast().then();
       BotManager.registerBot(this);
+      initService();
     });
     this.startUpdateAccessTokenCoroutine();
   }

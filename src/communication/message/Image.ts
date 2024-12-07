@@ -27,9 +27,30 @@ export class OnlineImage extends AbstractImage {
   ) {
     super();
   }
-  height: number = 0;
-  width: number = 0;
-  size: number = 0;
+  readonly height: number = 0;
+  readonly width: number = 0;
+  readonly size: number = 0;
+
+  toString(): string {
+    return this.serialization();
+  }
+
+  serialization(): string {
+    return `[arona:image:${this.url}]`;
+  }
+}
+
+export class OfflineImage extends AbstractImage {
+  constructor(raw: Buffer) {
+    super();
+  }
+  readonly resourceId: string = "";
+  readonly resourceUuid: string = "";
+  readonly ttl: number = 0;
+  readonly url: string = "";
+  readonly height: number = 0;
+  readonly width: number = 0;
+  readonly size: number = 0;
 
   toString(): string {
     return this.serialization();
