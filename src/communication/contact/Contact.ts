@@ -224,7 +224,9 @@ export class GroupImpl extends AbstractContact implements Group {
       messageSequence,
       GroupMessagePreSendEvent,
       GroupMessagePostSendEvent,
-    );
+    ).then((resp) => {
+      return new MessageReceipt(resp.id, resp.timestamp, this);
+    });
   }
 }
 
@@ -257,7 +259,7 @@ export class GuildChannelMemberImpl extends AbstractContact implements GuildChan
   constructor(
     readonly id: string,
     readonly channel: GuildChannel,
-    private readonly internalGuildMember: GuildMemberRaw,
+    protected readonly internalGuildMember: GuildMemberRaw,
     readonly unionOpenid?: string,
   ) {
     super(channel.bot);
@@ -271,6 +273,24 @@ export class GuildChannelMemberImpl extends AbstractContact implements GuildChan
   }
 
   doSendMessage(message: string | Message | MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>> {
+    return Promise.resolve(undefined);
+  }
+}
+
+export class GuildPrivateChannelMemberImpl extends GuildChannelMemberImpl {
+  constructor(
+    readonly id: string,
+    readonly channel: GuildChannel,
+    internalGuildMember: GuildMemberRaw,
+    readonly unionOpenid?: string,
+  ) {
+    super(id, channel, internalGuildMember, unionOpenid);
+  }
+
+  override doSendMessage(
+    message: string | Message | MessageChain,
+    messageSequence: number,
+  ): Promise<MessageReceipt<Contact>> {
     return Promise.resolve(undefined);
   }
 }

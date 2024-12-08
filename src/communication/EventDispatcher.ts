@@ -28,6 +28,7 @@ import { At, PlainText } from "./message/Message";
 import { OnlineImage } from "./message/Image";
 import { Contact, User } from "./types/Contact";
 import { CallbackButtonEvent } from "./message/CallbackButton";
+import { GuildPrivateChannelMemberImpl } from "./contact/Contact";
 
 type EventBodyTypeMapper = {
   MESSAGE_CREATE: ChannelMessageEventRaw;
@@ -65,10 +66,9 @@ const EventDispatcher = {
       case "DIRECT_MESSAGE_CREATE": {
         const payload = data as EventBodyTypeMapper[typeof type];
         const guild = bot.guilds.getOrCreate(payload.guild_id);
-        const member = guild.members.getOrCreate(payload.author.id);
         const channel = guild.channels.getOrCreate(payload.channel_id);
-        const channelMember = member.asGuildChannelMember(channel.id);
-        new GuildPrivateMessageEvent(toMessageChain(payload), raw.id, channelMember).broadcast().then();
+        const member = new GuildPrivateChannelMemberImpl(payload.author.id, channel, payload.member);
+        new GuildPrivateMessageEvent(toMessageChain(payload), raw.id, member).broadcast().then();
         break;
       }
       case "GROUP_AT_MESSAGE_CREATE": {

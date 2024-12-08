@@ -39,7 +39,7 @@ export type OpenapiEndpoint = {
     Url: "/v2/users/{openid}/messages";
     Method: "POST";
     ReqType: OpenapiFriendMessagePost;
-    RespType: Nullable<MessageReceipt<Friend>>;
+    RespType: Nullable<OpenapiMessagePostResp>;
   };
   PostFriendRichMessage: {
     Url: "/v2/users/{openid}/files";
@@ -51,7 +51,7 @@ export type OpenapiEndpoint = {
     Url: "/v2/groups/{group_openid}/messages";
     Method: "POST";
     ReqType: OpenapiGroupMessagePost;
-    RespType: Nullable<MessageReceipt<Group>>;
+    RespType: Nullable<OpenapiMessagePostResp>;
   };
   PostGroupRichMessage: {
     Url: "/v2/groups/{group_openid}/files";
@@ -63,13 +63,13 @@ export type OpenapiEndpoint = {
     Url: "/channels/{channel_id}/messages";
     Method: "POST";
     ReqType: OpenapiGuildMessagePost;
-    RespType: Nullable<MessageReceipt<GuildChannel>>;
+    RespType: Nullable<OpenapiMessagePostResp>;
   };
   PostGuildPrivateMessage: {
     Url: "/dms/{guild_id}/messages";
     Method: "POST";
     ReqType: OpenapiGuildMessagePost;
-    RespType: Nullable<MessageReceipt<GuildChannel>>;
+    RespType: Nullable<OpenapiMessagePostResp>;
   };
   DeleteFriendMessage: {
     Url: "/v2/users/{openid}/messages/{message_id}";
@@ -144,6 +144,11 @@ export const COpenapiEndpoint: { [key in keyof OpenapiEndpoint]: Omit<OpenapiEnd
       Method: "DELETE",
     },
   };
+
+export interface OpenapiMessagePostResp {
+  id: string;
+  timestamp: string;
+}
 
 export interface OpenapiMessagePost {
   content: string;

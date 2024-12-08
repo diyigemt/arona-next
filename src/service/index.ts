@@ -10,14 +10,13 @@ export function initService() {
     const mcb = MessageChainBuilder(ev.message.sourceId, ev.eventId);
     const txt = ev.message.filter((it) => it instanceof PlainText).join("");
     mcb.append("recv: " + txt);
-    ev.subject.sendMessage(mcb.build(), 1).then();
-    if (txt === "图图") {
-      const mb2 = MessageChainBuilder(ev.message.sourceId, ev.eventId);
-      const im = await ev.group.uploadImage(
-        "https://arona.cdn.diyigemt.com/image/some/Trip-Trap-Train%E5%A4%8D%E5%88%BB.png",
-      );
-      mb2.append(im);
-      ev.subject.sendMessage(mb2.build(), 2).then();
-    }
+    const result = await ev.subject.sendMessage(mcb.build(), 1);
+    mcb.splice(0, 1);
+    mcb.append("recall in 3s");
+    const result2 = await ev.subject.sendMessage(mcb.build(), 2);
+    setTimeout(() => {
+      result.recall().then();
+      result2.recall().then();
+    }, 3000);
   });
 }
