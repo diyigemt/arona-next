@@ -1,7 +1,6 @@
 import { Bot } from "../Bot";
-import { MessageChain } from "../message/MessageChain";
 import { BaseEventChannel } from "./EventChannel";
-import { Contact, Friend, Group, GroupMember, Guild, GuildChannelMember, GuildMember, User } from "../types/Contact";
+import { Contact, Friend, Group, GroupMember, Guild, GuildMember, User } from "../types/Contact";
 
 export class Event {
   async broadcast<T extends Event>() {
@@ -24,18 +23,6 @@ export abstract class BotEvent extends AbstractEvent {
   }
 }
 
-export abstract class MessageEvent extends BotEvent {
-  abstract subject: Contact;
-  abstract sender: Contact;
-
-  constructor(
-    readonly bot: Bot,
-    readonly message: MessageChain,
-  ) {
-    super(bot);
-  }
-}
-
 export abstract class UserChangeEvent extends BotEvent {
   abstract subject: Contact;
   abstract user: User;
@@ -54,74 +41,6 @@ export abstract class FriendEvent extends BotEvent {
   abstract friend: Friend;
 }
 
-export class GuildMessageEvent extends MessageEvent implements GuildEvent {
-  constructor(
-    readonly message: MessageChain,
-    readonly eventId: string,
-    readonly sender: GuildChannelMember,
-  ) {
-    super(sender.bot, message);
-  }
-
-  subject: Contact = this.sender.channel;
-  guild: Guild = this.sender.guild;
-
-  toString(): string {
-    return `[Guild(${this.subject.id})] ${this.sender.id} -> ${this.message}`;
-  }
-}
-
-export class GuildPrivateMessageEvent extends MessageEvent implements GuildEvent {
-  constructor(
-    readonly message: MessageChain,
-    readonly eventId: string,
-    readonly sender: GuildChannelMember,
-  ) {
-    super(sender.bot, message);
-  }
-
-  subject: Contact = this.sender.channel;
-  guild: Guild = this.sender.guild;
-
-  toString(): string {
-    return `[PrivateChannel(${this.subject.id})] ${this.sender.id} -> ${this.message}`;
-  }
-}
-
-export class FriendMessageEvent extends MessageEvent implements FriendEvent {
-  constructor(
-    readonly message: MessageChain,
-    readonly eventId: string,
-    readonly sender: Friend,
-  ) {
-    super(sender.bot, message);
-  }
-
-  subject: Contact = this.sender;
-  friend: Friend = this.sender;
-
-  toString(): string {
-    return `[Friend(${this.subject.id})] ${this.sender.id} -> ${this.message}`;
-  }
-}
-
-export class GroupMessageEvent extends MessageEvent implements GroupEvent {
-  constructor(
-    readonly message: MessageChain,
-    readonly eventId: string,
-    readonly sender: GroupMember,
-  ) {
-    super(sender.bot, message);
-  }
-
-  subject: Contact = this.sender.group;
-  group: Group = this.sender.group;
-
-  toString(): string {
-    return `[Group(${this.subject.id})] ${this.sender.id} -> ${this.message}`;
-  }
-}
-
 export class FriendAddEvent extends UserChangeEvent implements FriendEvent {
   constructor(
     readonly friend: Friend,
@@ -129,6 +48,7 @@ export class FriendAddEvent extends UserChangeEvent implements FriendEvent {
   ) {
     super(friend.bot);
   }
+
   user: Friend = this.friend;
   subject: Friend = this.friend;
 
@@ -144,6 +64,7 @@ export class FriendDeleteEvent extends UserChangeEvent implements FriendEvent {
   ) {
     super(friend.bot);
   }
+
   user: Friend = this.friend;
   subject: Friend = this.friend;
 
@@ -159,6 +80,7 @@ export class GroupAddEvent extends UserChangeEvent implements GroupAddEvent {
   ) {
     super(user.bot);
   }
+
   group: Group = this.user.group;
   subject: Group = this.group;
 
@@ -174,6 +96,7 @@ export class GroupDeleteEvent extends UserChangeEvent implements GroupAddEvent {
   ) {
     super(user.bot);
   }
+
   group: Group = this.user.group;
   subject: Group = this.group;
 

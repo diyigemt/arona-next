@@ -2,7 +2,7 @@ import { Message, PlainText } from "./message/Message";
 import { Image } from "./message/Image";
 import { MessageChain, MessageChainBuilder } from "./message/MessageChain";
 import axios, { AxiosInstance } from "axios";
-import GlobalEventChannel, { BotEvent, GroupMessageEvent, MessageEvent } from "./event/Event";
+import GlobalEventChannel, { BotEvent } from "./event/Event";
 import { EventChannel } from "./event/EventChannel";
 import { OpenApiAuthorizationReq, OpenApiAuthorizationResp } from "./types/Authorization";
 import { NodeSimpleLogger } from "../logger";
@@ -88,7 +88,10 @@ export class Bot implements Contact {
     return Buffer.from(ed25519.sign(body, this.webhookPrivateKey));
   }
 
-  sendMessage(message: string | Message | MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>> {
+  async sendMessage(
+    message: string | Message | MessageChain,
+    messageSequence: number,
+  ): Promise<MessageReceipt<Contact>> {
     return Promise.resolve(undefined);
   }
 

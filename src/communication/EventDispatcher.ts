@@ -15,13 +15,11 @@ import { Bot } from "./Bot";
 import {
   FriendAddEvent,
   FriendDeleteEvent,
-  FriendMessageEvent,
   GroupAddEvent,
   GroupDeleteEvent,
-  GroupMessageEvent,
   GuildAddEvent,
-  GuildMessageEvent,
-  GuildPrivateMessageEvent,
+
+
 } from "./event/Event";
 import { MessageChain, MessageChainImpl } from "./message/MessageChain";
 import { At, PlainText } from "./message/Message";
@@ -29,6 +27,12 @@ import { OnlineImage } from "./message/Image";
 import { Contact, User } from "./types/Contact";
 import { CallbackButtonEvent } from "./message/CallbackButton";
 import { GuildPrivateChannelMemberImpl } from "./contact/Contact";
+import {
+  FriendMessageEvent,
+  GroupMessageEvent,
+  GuildMessageEvent,
+  GuildPrivateMessageEvent
+} from "./event/MessageEvent";
 
 type EventBodyTypeMapper = {
   MESSAGE_CREATE: ChannelMessageEventRaw;

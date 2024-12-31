@@ -1,7 +1,7 @@
 import BotManager from "../communication/BotManager";
-import { GroupMessageEvent } from "../communication/event/Event";
 import { MessageChainBuilder } from "../communication/message/MessageChain";
 import { PlainText } from "../communication/message/Message";
+import { GroupMessageEvent } from "../communication/event/MessageEvent";
 
 export function initService() {
   const bot = BotManager.getBot();

@@ -1,20 +1,29 @@
 import { Message, PlainText } from "./Message";
 
 export interface MessageChain extends Message, Array<Message> {
-  sourceId: string;
+  messageId: string;
   eventId?: string;
 }
 
 export class MessageChainImpl extends Array<Message> implements MessageChain {
   constructor(
-    readonly sourceId: string,
-    readonly eventId?: string,
+    public messageId: string,
+    public eventId?: string,
     messages?: Message[],
   ) {
     super();
     if (messages) {
       this.push(...messages);
     }
+  }
+
+  push(...items: Message[]): number {
+    if (items.length === 1 && items[0] instanceof MessageChainImpl) {
+      const ch = items[0];
+      this.messageId = ch.messageId;
+      this.eventId = ch.eventId;
+    }
+    return [].push.apply(this, ...items);
   }
 
   readonly [Symbol.unscopables]: object;
@@ -59,7 +68,7 @@ class MessageChainBuilderImpl extends Array<Message> implements MessageChainBuil
     if (typeof element === "string") {
       this.push(new PlainText(element));
     } else if (Array.isArray(element)) {
-      this.sourceMessageId = element.sourceId ?? this.sourceMessageId;
+      this.sourceMessageId = element.messageId ?? this.sourceMessageId;
       this.eventId = element.eventId ?? this.eventId;
     } else {
       this.push(element);
@@ -70,4 +79,23 @@ class MessageChainBuilderImpl extends Array<Message> implements MessageChainBuil
   build(): MessageChain {
     return new MessageChainImpl(this.sourceMessageId ?? "", this.eventId, this);
   }
+}
+
+export function MessageToMessageChain(message: Message): MessageChain;
+export function MessageToMessageChain(message: Message, messageId?: string, eventId?: string): MessageChain;
+export function MessageToMessageChain(message: Message, messageId?: string, eventId?: string): MessageChain {
+  if (!messageId) {
+    if (message instanceof MessageChainImpl) {
+      return message;
+    } else {
+      return new MessageChainImpl(messageId, eventId, [message]);
+    }
+  }
+  const mc = new MessageChainImpl(messageId, eventId);
+  if (message instanceof MessageChainImpl) {
+    mc.push(...message);
+  } else {
+    mc.push(message);
+  }
+  return mc.toMessageChain();
 }
