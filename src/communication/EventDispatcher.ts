@@ -12,15 +12,7 @@ import {
   WebhookEventTypes,
 } from "./types/Message";
 import { Bot } from "./Bot";
-import {
-  FriendAddEvent,
-  FriendDeleteEvent,
-  GroupAddEvent,
-  GroupDeleteEvent,
-  GuildAddEvent,
-
-
-} from "./event/Event";
+import { FriendAddEvent, FriendDeleteEvent, GroupAddEvent, GroupDeleteEvent, GuildAddEvent } from "./event/Event";
 import { MessageChain, MessageChainImpl } from "./message/MessageChain";
 import { At, PlainText } from "./message/Message";
 import { OnlineImage } from "./message/Image";
@@ -201,7 +193,7 @@ function parsePlainTextAndImage(raw: MessageEventRaw, chain: MessageChain) {
 }
 
 function toChannelRawMessageChain(raw: ChannelMessageEventRaw): MessageChain {
-  const messageChain = new MessageChainImpl(raw.id);
+  const messageChain = new MessageChainImpl(raw.id, undefined, []);
   parsePlainTextAndImage(raw, messageChain);
   return messageChain;
 }
@@ -211,7 +203,7 @@ function toMessageChain(raw: MessageEventRaw): MessageChain {
     // 频道消息
     return toChannelRawMessageChain(raw as ChannelMessageEventRaw);
   }
-  const messageChain = new MessageChainImpl(raw.id);
+  const messageChain = new MessageChainImpl(raw.id, undefined, []);
   parsePlainTextAndImage(raw, messageChain);
   return messageChain;
 }

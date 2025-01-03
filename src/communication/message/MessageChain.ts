@@ -23,7 +23,7 @@ export class MessageChainImpl extends Array<Message> implements MessageChain {
       this.messageId = ch.messageId;
       this.eventId = ch.eventId;
     }
-    return [].push.apply(this, ...items);
+    return [].push.apply(this, items);
   }
 
   readonly [Symbol.unscopables]: object;
@@ -91,7 +91,7 @@ export function MessageToMessageChain(message: Message, messageId?: string, even
       return new MessageChainImpl(messageId, eventId, [message]);
     }
   }
-  const mc = new MessageChainImpl(messageId, eventId);
+  const mc = new MessageChainImpl(messageId, eventId, []);
   if (message instanceof MessageChainImpl) {
     mc.push(...message);
   } else {

@@ -5,6 +5,7 @@ import * as YAML from "yaml";
 import * as fs from "node:fs";
 import { Bot } from "./communication/Bot";
 import { AronaConfig } from "./types";
+import { registerAllCommand } from "./command/CommandManager";
 
 const config = YAML.parse(fs.readFileSync("./config.yaml", "utf8")) as AronaConfig;
 
@@ -13,6 +14,8 @@ async function bootstrap() {
 
   await app.listen(config.web.port ?? 8080, process.env.HOST ?? "0.0.0.0");
 }
+
+registerAllCommand();
 
 const bot = new Bot(config.bot);
 bot.login();

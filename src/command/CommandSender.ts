@@ -23,7 +23,7 @@ interface CommandSender {
   sendMessage(message: Message): Promise<MessageReceipt<Contact> | undefined>;
 }
 
-abstract class AbstractCommandSender implements CommandSender {
+export abstract class AbstractCommandSender implements CommandSender {
   abstract readonly bot?: Bot;
   abstract readonly subject?: Contact;
   abstract readonly user?: User;
