@@ -88,7 +88,10 @@ export abstract class AbstractContact implements Contact {
     }
   }
 
-  protected abstract doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>>;
+  protected abstract doSendMessage(
+    message: MessageChain,
+    messageSequence: number,
+  ): Promise<MessageReceipt<Contact> | undefined>;
 
   async uploadImage(dataLike: string | Buffer): Promise<Image> {
     if (typeof dataLike !== "string") {
@@ -186,7 +189,7 @@ export class FriendImpl extends AbstractContact implements Friend {
 
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
 
-  async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Friend>> {
+  async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Friend> | undefined> {
     return this.callMessageOpenApi(
       "PostFriendMessage",
       {
@@ -197,7 +200,10 @@ export class FriendImpl extends AbstractContact implements Friend {
       FriendMessagePreSendEvent,
       FriendMessagePostSendEvent,
     ).then((resp) => {
-      return new MessageReceipt(resp.id, resp.timestamp, this);
+      if (resp && resp.id && resp.timestamp) {
+        return new MessageReceipt(resp.id, resp.timestamp, this);
+      }
+      return undefined;
     });
   }
 }
@@ -233,7 +239,7 @@ export class GroupImpl extends AbstractContact implements Group {
   members: ContactList<GroupMember> = new ContactList<GroupMember>((id: string) => new GroupMemberImpl(id, this, null));
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
 
-  async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Group>> {
+  async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Group> | undefined> {
     return this.callMessageOpenApi(
       "PostGroupMessage",
       {
@@ -244,7 +250,10 @@ export class GroupImpl extends AbstractContact implements Group {
       GroupMessagePreSendEvent,
       GroupMessagePostSendEvent,
     ).then((resp) => {
-      return new MessageReceipt(resp.id, resp.timestamp, this);
+      if (resp && resp.id && resp.timestamp) {
+        return new MessageReceipt(resp.id, resp.timestamp, this);
+      }
+      return undefined;
     });
   }
 }
@@ -272,7 +281,7 @@ export class GuildMemberImpl extends AbstractContact implements GuildMember {
   async doSendMessage(
     message: string | Message | MessageChain,
     messageSequence: number,
-  ): Promise<MessageReceipt<Contact>> {
+  ): Promise<MessageReceipt<Contact> | undefined> {
     return Promise.reject(new Error("只能通过`asGuildChannelMember`发送"));
   }
 }
@@ -297,7 +306,7 @@ export class GuildChannelMemberImpl extends AbstractContact implements GuildChan
   async doSendMessage(
     message: string | Message | MessageChain,
     messageSequence: number,
-  ): Promise<MessageReceipt<Contact>> {
+  ): Promise<MessageReceipt<Contact> | undefined> {
     return Promise.resolve(undefined);
   }
 }
@@ -312,7 +321,10 @@ export class GuildPrivateChannelMemberImpl extends GuildChannelMemberImpl {
     super(id, channel, internalGuildMember, unionOpenid);
   }
 
-  async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<GuildChannelMember>> {
+  async doSendMessage(
+    message: MessageChain,
+    messageSequence: number,
+  ): Promise<MessageReceipt<GuildChannelMember> | undefined> {
     return this.callMessageOpenApi(
       "PostGuildPrivateMessage",
       {
@@ -323,7 +335,10 @@ export class GuildPrivateChannelMemberImpl extends GuildChannelMemberImpl {
       GuildPrivateMessagePreSendEvent,
       GuildPrivateMessagePostSendEvent,
     ).then((resp) => {
-      return new MessageReceipt(resp.id, resp.timestamp, this);
+      if (resp && resp.id && resp.timestamp) {
+        return new MessageReceipt(resp.id, resp.timestamp, this);
+      }
+      return undefined;
     });
   }
 }
@@ -343,7 +358,10 @@ export class GuildChannelImpl extends AbstractContact implements GuildChannel {
   );
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
 
-  async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<GuildChannel>> {
+  async doSendMessage(
+    message: MessageChain,
+    messageSequence: number,
+  ): Promise<MessageReceipt<GuildChannel> | undefined> {
     return this.callMessageOpenApi(
       "PostGuildMessage",
       {
@@ -354,7 +372,10 @@ export class GuildChannelImpl extends AbstractContact implements GuildChannel {
       GuildMessagePreSendEvent,
       GuildMessagePostSendEvent,
     ).then((resp) => {
-      return new MessageReceipt(resp.id, resp.timestamp, this);
+      if (resp && resp.id && resp.timestamp) {
+        return new MessageReceipt(resp.id, resp.timestamp, this);
+      }
+      return undefined;
     });
   }
 }

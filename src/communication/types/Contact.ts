@@ -10,9 +10,9 @@ export interface Contact {
   unionOpenid?: string;
   unionOpenidOrId: string;
 
-  sendMessage(message: string, messageSequence: number): Promise<MessageReceipt<Contact>>;
-  sendMessage(message: Message, messageSequence: number): Promise<MessageReceipt<Contact>>;
-  sendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Contact>>;
+  sendMessage(message: string, messageSequence: number): Promise<MessageReceipt<Contact> | undefined>;
+  sendMessage(message: Message, messageSequence: number): Promise<MessageReceipt<Contact> | undefined>;
+  sendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Contact> | undefined>;
 
   uploadImage(dataLike: string | Buffer): Promise<Image>;
 }

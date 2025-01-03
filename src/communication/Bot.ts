@@ -34,7 +34,7 @@ export class Bot implements Contact {
   bot: Bot = this;
   id: string = this.config.id;
   unionOpenidOrId: string = this.config.id;
-  httpClient: AxiosInstance;
+  private httpClient: AxiosInstance;
   logger = NodeSimpleLogger(`Bot.${this.config.id}`);
   friends = new ContactList<Friend>((id: string) => new FriendImpl(id, this));
   groups = new ContactList<Group>((id: string) => new GroupImpl(id, this));
