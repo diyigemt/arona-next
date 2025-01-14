@@ -14,7 +14,6 @@ export enum ReflectMetadataKey {
 }
 
 export type CommandHandlerArgumentParam<T = string> = {
-  name: string;
   description?: string;
   required?: boolean;
   defaultValue?: T;
@@ -23,7 +22,6 @@ export type CommandHandlerArgumentParam<T = string> = {
 };
 
 export type CommandHandlerOptionParam<T = string> = {
-  name: string; // --data
   description?: string; // expected datatype
   shortName?: string; // -d
   argumentName?: string; // -d <datatype>
@@ -33,7 +31,7 @@ export type CommandHandlerOptionParam<T = string> = {
 };
 
 export type CommandHandlerParamType<T = string> = CommandHandlerArgumentParam<T> | CommandHandlerOptionParam<T>;
-export type CommandHandlerParamTypeMap = Map<number, CommandHandlerParamType>;
+export type CommandHandlerParamTypeMap = Map<string, CommandHandlerParamType>;
 
 export function AronaCommand(commandName: string): ClassDecorator {
   return (target) => {
@@ -54,26 +52,26 @@ export function ActionHandler(ctx: ClassType<AbstractCommandSender>): MethodDeco
   };
 }
 
-export function CommandArgument(config: Omit<CommandHandlerArgumentParam, "type">): ParameterDecorator {
-  return (target, propertyKey, parameterIndex: number) => {
+export function CommandArgument(config: Omit<CommandHandlerArgumentParam, "type"> = {}): PropertyDecorator {
+  return (target, propertyKey) => {
     const map: CommandHandlerParamTypeMap =
-      Reflect.getOwnMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, target, propertyKey) ?? new Map();
-    map.set(parameterIndex, {
+      Reflect.getOwnMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, target) ?? new Map();
+    map.set(propertyKey as string, {
       ...config,
       type: "Argument",
     });
-    Reflect.defineMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, map, target, propertyKey);
+    Reflect.defineMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, map, target);
   };
 }
 
-export function CommandOption(config: Omit<CommandHandlerOptionParam, "type">): ParameterDecorator {
-  return (target, propertyKey, parameterIndex: number) => {
+export function CommandOption(config: Omit<CommandHandlerOptionParam, "type"> = {}): PropertyDecorator {
+  return (target, propertyKey) => {
     const map: CommandHandlerParamTypeMap =
-      Reflect.getOwnMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, target, propertyKey) ?? new Map();
-    map.set(parameterIndex, {
+      Reflect.getOwnMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, target) ?? new Map();
+    map.set(propertyKey as string, {
       ...config,
       type: "Option",
     });
-    Reflect.defineMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, map, target, propertyKey);
+    Reflect.defineMetadata(ReflectMetadataKey.COMMAND_HANDLER_PARAM, map, target);
   };
 }

@@ -111,7 +111,7 @@ export abstract class AbstractContact implements Contact {
           },
         )
         .then((resp) => {
-          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, "");
+          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, dataLike);
         });
     } else if (this instanceof GroupImpl) {
       return await this.bot
@@ -127,7 +127,7 @@ export abstract class AbstractContact implements Contact {
           },
         )
         .then((resp) => {
-          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, "");
+          return new OnlineImage(resp.file_info, resp.file_uuid, resp.ttl, dataLike);
         });
     } else {
       new OnlineImage("", "", 0, dataLike);

@@ -2,15 +2,13 @@ import { Bot } from "../communication/Bot";
 import {
   Contact,
   Friend,
-  Group,
   GroupMember,
-  GuildChannel,
   GuildChannelMember,
   User,
 } from "../communication/types/Contact";
 import { MessageReceipt } from "../communication/message/MessageReceipt";
 import { Message, PlainText } from "../communication/message/Message";
-import { MessageChain, MessageToMessageChain } from "../communication/message/MessageChain";
+import { MessageToMessageChain } from "../communication/message/MessageChain";
 
 interface CommandSender {
   readonly bot?: Bot;

@@ -93,6 +93,6 @@ export async function executeCommand(message: Message, caller: AbstractCommandSe
   // @ts-ignore
   const command: AbstractCommand = new commandSignature.clazz();
   const ctx = Reflect.get(command, "ctx") as Map<string, unknown>;
-  ctx?.set("ctx", caller);
+  ctx?.set("_ctx", caller);
   return command.parseAsync(parseArg, { from: "user" });
 }
