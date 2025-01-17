@@ -108,6 +108,11 @@ export class BaseEventChannel extends EventChannel<Event> {
   registerListener<E extends Event, L extends Listener<E>>(eventClass: ClassType<E>, listener: L) {
     this.eventListeners.addListener(eventClass, listener);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-function-type
+  async syncFromEvent<E extends Event, R = any>(mapper: (E) => Promise<R>) {
+
+  }
 }
 
 class FilterEventChannel<BaseEvent extends Event> extends EventChannel<BaseEvent> {
