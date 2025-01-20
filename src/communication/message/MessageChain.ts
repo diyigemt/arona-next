@@ -41,7 +41,7 @@ export class MessageChainImpl extends Array<Message> implements MessageChain {
   }
 }
 
-export function MessageChainBuilder(messageId: string, eventId?: string): MessageChainBuilder {
+export function MessageChainBuilder(messageId?: string, eventId?: string): MessageChainBuilder {
   return new MessageChainBuilderImpl([], messageId, eventId);
 }
 

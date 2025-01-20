@@ -1,4 +1,4 @@
-import { Event } from "./Event";
+import GlobalEventChannel, { Event } from "./Event";
 import { ClassType } from "../types/Helper";
 
 const CoroutineExceptionHandler = Symbol.for("CoroutineExceptionHandler");
@@ -110,8 +110,28 @@ export class BaseEventChannel extends EventChannel<Event> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-function-type
-  async syncFromEvent<E extends Event, R = any>(mapper: (E) => Promise<R>) {
-
+  async syncFromEvent<E extends Event, R = any>(
+    eventClass: ClassType<E>,
+    mapper: (e: E) => Promise<R | undefined>,
+  ): Promise<R> {
+    return new Promise((resolve) => {
+      GlobalEventChannel.subscribe(eventClass, (ev) => {
+        return new Promise((rs) => {
+          mapper(ev)
+            .then((r) => {
+              if (r) {
+                rs(ListeningStatus.STOPPED);
+                resolve(r);
+              } else {
+                rs(ListeningStatus.LISTENING);
+              }
+            })
+            .catch(() => {
+              rs(ListeningStatus.LISTENING);
+            });
+        });
+      });
+    });
   }
 }
 
