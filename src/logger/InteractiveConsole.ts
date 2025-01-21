@@ -5,7 +5,7 @@ const terminalWidth = terminal.width;
 const terminalHeight = terminal.height;
 terminal.grabInput(true);
 let obj: ReturnType<typeof terminal.inputField>;
-function catchInput() {
+export function catchInput() {
   obj = terminal.inputField(
     {
       // @ts-ignore
@@ -14,6 +14,9 @@ function catchInput() {
       cancelable: true,
     },
     (_, input) => {
+      if (input === "exit") {
+        process.exit(0);
+      }
       obj.abort();
       catchInput();
     },
@@ -47,7 +50,4 @@ export function printAbove(msg: string, type: LogType = "info") {
   terminal.restoreCursor();
   // @ts-ignore
   obj.redraw();
-}
-export function initTerminal() {
-  catchInput();
 }

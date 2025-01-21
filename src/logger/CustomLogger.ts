@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // @ts-nocheck
 /*
  * console.js: Transport for outputting to the console.
@@ -9,14 +8,12 @@
 
 "use strict";
 
-import { printAbove } from "./console";
-
+import { printAbove } from "./InteractiveConsole";
 import * as os from "os";
+import * as TransportStream from "winston-transport";
 
 const LEVEL = Symbol.for("level");
 const MESSAGE = Symbol.for("message");
-
-import TransportStream from "winston-transport";
 
 type Option = {
   name: string;

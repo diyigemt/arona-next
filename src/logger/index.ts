@@ -1,5 +1,8 @@
 import * as winston from "winston";
 import "winston-daily-rotate-file";
+import { terminal } from "terminal-kit";
+import { Console } from "./CustomLogger";
+import { catchInput } from "./InteractiveConsole";
 
 const { format, transports } = winston;
 
@@ -23,7 +26,7 @@ export function NodeSimpleLogger(name: string) {
         format.printf(loggerFormatter),
       ),
       transports: [
-        new transports.Console(),
+        new Console(),
         new transports.DailyRotateFile({
           filename: "log/arona-%DATE%.log",
           datePattern: "YYYY-MM-DD",
@@ -35,4 +38,9 @@ export function NodeSimpleLogger(name: string) {
     });
   }
   return LoggerCache[name];
+}
+
+export function initTerminal() {
+  terminal.eraseDisplay();
+  catchInput();
 }

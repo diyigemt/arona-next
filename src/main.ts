@@ -7,7 +7,7 @@ import { Bot } from "./communication/Bot";
 import { AronaConfig } from "./types";
 import { registerAllCommand } from "./command/CommandManager";
 import "reflect-metadata";
-import { initTerminal } from "./logger/Console";
+import { initTerminal } from "./logger";
 import { NestLogger } from "./logger/NestLogger";
 
 const config = YAML.parse(fs.readFileSync("./config.yaml", "utf8")) as AronaConfig;
