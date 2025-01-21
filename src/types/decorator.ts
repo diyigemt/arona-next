@@ -48,7 +48,7 @@ export function SubCommand(commandName: string, parent: ClassType<AbstractComman
 
 export function ActionHandler(ctx: ClassType<AbstractCommandSender>): MethodDecorator {
   return (target, key, descriptor) => {
-    Reflect.defineMetadata(ReflectMetadataKey.COMMAND_HANDLER_CONTEXT, ctx, descriptor.value);
+    Reflect.defineMetadata(ReflectMetadataKey.COMMAND_HANDLER_CONTEXT, ctx, descriptor.value as never);
   };
 }
 

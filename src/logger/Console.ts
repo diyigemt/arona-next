@@ -4,7 +4,7 @@ import { terminal, stringWidth } from "terminal-kit";
 const terminalWidth = terminal.width;
 const terminalHeight = terminal.height;
 terminal.grabInput(true);
-let obj;
+let obj: ReturnType<typeof terminal.inputField>;
 function catchInput() {
   obj = terminal.inputField(
     {
@@ -19,7 +19,7 @@ function catchInput() {
     },
   );
 }
-terminal.on("key", (name) => {
+terminal.on("key", (name: string) => {
   if (name === "CTRL_C") {
     obj.abort();
     catchInput();

@@ -23,9 +23,10 @@ export class MessageChainImpl extends Array<Message> implements MessageChain {
       this.messageId = ch.messageId;
       this.eventId = ch.eventId;
     }
-    return [].push.apply(this, items);
+    return ([] as unknown[]).push.apply(this, items);
   }
 
+  // @ts-ignore
   readonly [Symbol.unscopables]: object;
 
   serialization(): string {
@@ -88,7 +89,7 @@ export function MessageToMessageChain(message: Message, messageId?: string, even
     if (message instanceof MessageChainImpl) {
       return message;
     } else {
-      return new MessageChainImpl(messageId, eventId, [message]);
+      return new MessageChainImpl(messageId!, eventId, [message]);
     }
   }
   const mc = new MessageChainImpl(messageId, eventId, []);

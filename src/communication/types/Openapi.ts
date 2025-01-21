@@ -1,6 +1,3 @@
-import { MessageReceipt } from "../message/MessageReceipt";
-
-import { Friend, Group, GuildChannel } from "./Contact";
 import { MarkdownMessage } from "./Markdown";
 import { KeyboardMessage } from "./Keyboard";
 import {
@@ -20,12 +17,12 @@ type ParseStringTemplate<T extends string> = T extends `${infer _Start}{${infer 
   ? Key extends string
     ? { [K in Key]: string } & ParseStringTemplate<Rest>
     : never
-  : {};
+  : object;
 
 export type OpenApiUrlPlaceHolder<T extends string> = ClearEmptyObject<ParseStringTemplate<T>>;
 export type OpenapiNeedData<EP extends keyof OpenapiEndpoint> = OpenapiEndpoint[EP]["Method"] extends "GET"
   ? null
-  : OpenapiEndpoint[EP]["ReqType"] extends {}
+  : OpenapiEndpoint[EP]["ReqType"] extends object
     ? OpenapiEndpoint[EP]["ReqType"]
     : null;
 export type OpenapiEndpoint = {

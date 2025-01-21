@@ -23,8 +23,9 @@ import {
   FriendMessageEvent,
   GroupMessageEvent,
   GuildMessageEvent,
-  GuildPrivateMessageEvent
+  GuildPrivateMessageEvent,
 } from "./event/MessageEvent";
+import { isChannelMessage } from "./types/Helper";
 
 type EventBodyTypeMapper = {
   MESSAGE_CREATE: ChannelMessageEventRaw;
@@ -183,9 +184,9 @@ function parsePlainTextAndImage(raw: MessageEventRaw, chain: MessageChain) {
     }
   }
   // 图片解析
-  if (raw.attachments?.length > 0) {
+  if ((raw.attachments?.length ?? 0) > 0) {
     chain.push(
-      ...raw.attachments.map((it) => {
+      ...raw.attachments!.map((it) => {
         return new OnlineImage("", "", 0, it.url);
       }),
     );
@@ -197,11 +198,10 @@ function toChannelRawMessageChain(raw: ChannelMessageEventRaw): MessageChain {
   parsePlainTextAndImage(raw, messageChain);
   return messageChain;
 }
-
 function toMessageChain(raw: MessageEventRaw): MessageChain {
-  if (raw["channel_id"]) {
+  if (isChannelMessage(raw)) {
     // 频道消息
-    return toChannelRawMessageChain(raw as ChannelMessageEventRaw);
+    return toChannelRawMessageChain(raw);
   }
   const messageChain = new MessageChainImpl(raw.id, undefined, []);
   parsePlainTextAndImage(raw, messageChain);

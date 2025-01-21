@@ -14,7 +14,7 @@ export interface Contact {
   sendMessage(message: Message, messageSequence: number): Promise<MessageReceipt<Contact> | undefined>;
   sendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Contact> | undefined>;
 
-  uploadImage(dataLike: string | Buffer): Promise<Image>;
+  uploadImage(dataLike: string | Buffer): Promise<Image | undefined>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -57,10 +57,10 @@ export class ContactList<C extends Contact> extends Map<string, C> {
     super();
   }
   getOrCreate(id: string): C {
-    const tmp = this[id];
+    const tmp = this.get(id);
     if (!tmp) {
-      this[id] = this.generator(id);
+      this.set(id, this.generator(id));
     }
-    return this[id];
+    return this.get(id)!;
   }
 }

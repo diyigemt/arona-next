@@ -6,6 +6,7 @@ import { ActionHandler, AronaCommand, CommandArgument } from "../types/decorator
 import { AbstractCommand } from "../command/AbstractCommand";
 import axios from "axios";
 import { MessageChainBuilder } from "../communication/message/MessageChain";
+import { withTimeoutOrNull } from "../utils";
 
 export function initService() {
   const bot = BotManager.getBot();
@@ -19,7 +20,7 @@ export function initService() {
 type AronaServerResponse<T> = {
   code: number;
   message: string;
-  data: T | null;
+  data: T;
 };
 
 type ImageQueryData = {
@@ -30,13 +31,13 @@ type ImageQueryData = {
 };
 
 @AronaCommand("攻略")
-export class HellWorldCommand extends AbstractCommand {
+export class TrainerCommand extends AbstractCommand {
   private httpClient = axios.create({
     timeout: 10000,
   });
 
   @CommandArgument()
-  private imName: string;
+  private imName!: string;
 
   constructor() {
     super("攻略");
@@ -44,42 +45,48 @@ export class HellWorldCommand extends AbstractCommand {
 
   @ActionHandler(GroupCommandSender)
   async handle(ctx: GroupCommandSender) {
-    this.getImage(ctx, this.imName).then(async (resp) => {
-      if (!resp) {
-        ctx.sendMessage("api服务器出错, 请稍后再试").then();
+    const resp = await this.getImage(ctx, this.imName);
+    if (!resp) {
+      ctx.sendMessage("api服务器出错, 请稍后再试").then();
+      return;
+    }
+    if (resp.code !== 200) {
+      // 多选
+      const mcb = MessageChainBuilder();
+      mcb.append(`未找到有关${this.imName}的内容, 是否想要查找:`);
+      resp.data.forEach((it, index) => {
+        mcb.append(`${index + 1}. ${it.name}`);
+      });
+      await ctx.sendMessage(mcb.build());
+      const choseMessage = await withTimeoutOrNull(5000, ctx.nextMessage());
+      if (!choseMessage) {
+        ctx.sendMessage("选择超时").then();
         return;
       }
-      if (resp.code !== 200) {
-        // 多选
-        const mc = MessageChainBuilder();
-        mc.append(`未找到有关${this.imName}的内容, 是否想要查找:`);
-        resp.data.forEach((it, index) => {
-          mc.append(`${index + 1}. ${it.name}`);
-        });
-        await ctx.sendMessage(mc.build());
-        const choseMessage = await ctx.nextMessage();
-        const chose = choseMessage.message.toString();
-        const num = Number(chose);
-        if (num > 0 && num < resp.data.length) {
-          this.getImage(ctx, resp.data[num].content).then(async (data) => {
-            if (!data) {
-              ctx.sendMessage("api服务器出错, 请稍后再试").then();
-              return;
-            }
-            const url = `https://arona.cdn.diyigemt.com/image${data.data[0].content}`;
-            const im = await ctx.subject.uploadImage(url);
-            ctx.sendMessage(im).then();
-          });
+      const chose = choseMessage.message.toString();
+      const num = Number(chose);
+      if (num > 0 && num <= resp.data.length) {
+        const data = await this.getImage(ctx, resp.data[num - 1].name);
+        if (!data) {
+          ctx.sendMessage("api服务器出错, 请稍后再试").then();
+          return;
         }
-      } else {
-        const url = `https://arona.cdn.diyigemt.com/image${resp.data[0].content}`;
+        const url = `https://arona.cdn.diyigemt.com/image${data.data[0].content}`;
         const im = await ctx.subject.uploadImage(url);
+        if (im) {
+          ctx.sendMessage(im).then();
+        }
+      }
+    } else {
+      const url = `https://arona.cdn.diyigemt.com/image${resp.data[0].content}`;
+      const im = await ctx.subject.uploadImage(url);
+      if (im) {
         ctx.sendMessage(im).then();
       }
-    });
+    }
   }
 
-  private getImage(ctx: GroupCommandSender, name: string) {
+  private async getImage(ctx: GroupCommandSender, name: string) {
     return this.httpClient
       .get("https://arona.diyigemt.com/api/v2/image", {
         params: {
@@ -93,7 +100,7 @@ export class HellWorldCommand extends AbstractCommand {
         return resp.data as AronaServerResponse<ImageQueryData[]>;
       })
       .catch((err) => {
-        ctx.bot.logger.error(err);
+        ctx.bot?.logger.error(err);
       });
   }
 }

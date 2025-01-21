@@ -52,20 +52,26 @@ abstract class AbstractUserCommandSender extends AbstractCommandSender {
     return this.user?.bot;
   }
 
-  sendMessage(message: string | Message): Promise<MessageReceipt<Contact> | undefined> {
+  async sendMessage(message: string | Message): Promise<MessageReceipt<Contact> | undefined> {
     const msg = typeof message === "string" ? new PlainText(message) : message;
-    const rec = this.subject.sendMessage(
-      MessageToMessageChain(msg, this.messageId, this.eventId),
-      this.messageSequence,
-    );
-    if (rec) {
-      this.messageSequence++;
+    if (this.subject) {
+      try {
+        const rec = await this.subject.sendMessage(
+          MessageToMessageChain(msg, this.messageId, this.eventId),
+          this.messageSequence,
+        );
+        if (rec) {
+          this.messageSequence++;
+        }
+        return rec;
+      } catch (e) {
+        return Promise.resolve(undefined);
+      }
     }
-    return rec;
+    return Promise.resolve(undefined);
   }
 
   abstract nextMessage(
-    timeoutMillis: number,
     filter: (ctx: AbstractUserCommandSender, ev: MessageEvent) => Promise<boolean>,
   ): Promise<MessageEvent>;
 }
@@ -84,19 +90,10 @@ export class FriendCommandSender extends AbstractUserCommandSender {
   }
 
   nextMessage(
-    timeoutMillis: number = -1,
     filter: (ctx: FriendCommandSender, ev: FriendMessageEvent) => Promise<boolean> = () => Promise.resolve(true),
   ): Promise<FriendMessageEvent> {
     const mapper = createMapper(this, filter);
-    const promise = new Promise<FriendMessageEvent>((resolve) => {
-      GlobalEventChannel.syncFromEvent<FriendMessageEvent, FriendMessageEvent>(FriendMessageEvent, mapper).then(
-        resolve,
-      );
-    });
-    if (timeoutMillis === -1) {
-      return promise;
-    }
-    return withTimeout(timeoutMillis, promise);
+    return GlobalEventChannel.syncFromEvent<FriendMessageEvent, FriendMessageEvent>(FriendMessageEvent, mapper);
   }
 }
 
@@ -114,17 +111,10 @@ export class GroupCommandSender extends AbstractUserCommandSender {
   }
 
   nextMessage(
-    timeoutMillis: number = -1,
     filter: (ctx: GroupCommandSender, ev: GroupMessageEvent) => Promise<boolean> = () => Promise.resolve(true),
   ): Promise<GroupMessageEvent> {
     const mapper = createMapper(this, filter);
-    const promise = new Promise<GroupMessageEvent>((resolve) => {
-      GlobalEventChannel.syncFromEvent<GroupMessageEvent, GroupMessageEvent>(GroupMessageEvent, mapper).then(resolve);
-    });
-    if (timeoutMillis === -1) {
-      return promise;
-    }
-    return withTimeout(timeoutMillis, promise);
+    return GlobalEventChannel.syncFromEvent<GroupMessageEvent, GroupMessageEvent>(GroupMessageEvent, mapper);
   }
 }
 
@@ -142,17 +132,10 @@ export class GuildCommandSender extends AbstractUserCommandSender {
   }
 
   nextMessage(
-    timeoutMillis: number = -1,
     filter: (ctx: GuildCommandSender, ev: GuildMessageEvent) => Promise<boolean> = () => Promise.resolve(true),
   ): Promise<GuildMessageEvent> {
     const mapper = createMapper(this, filter);
-    const promise = new Promise<GuildMessageEvent>((resolve) => {
-      GlobalEventChannel.syncFromEvent<GuildMessageEvent, GuildMessageEvent>(GuildMessageEvent, mapper).then(resolve);
-    });
-    if (timeoutMillis === -1) {
-      return promise;
-    }
-    return withTimeout(timeoutMillis, promise);
+    return GlobalEventChannel.syncFromEvent<GuildMessageEvent, GuildMessageEvent>(GuildMessageEvent, mapper);
   }
 }
 
@@ -170,21 +153,14 @@ export class GuildPrivateCommandSender extends AbstractUserCommandSender {
   }
 
   nextMessage(
-    timeoutMillis: number = -1,
     filter: (ctx: GuildPrivateCommandSender, ev: GuildPrivateMessageEvent) => Promise<boolean> = () =>
       Promise.resolve(true),
   ): Promise<GuildPrivateMessageEvent> {
     const mapper = createMapper(this, filter);
-    const promise = new Promise<GuildPrivateMessageEvent>((resolve) => {
-      GlobalEventChannel.syncFromEvent<GuildPrivateMessageEvent, GuildPrivateMessageEvent>(
-        GuildPrivateMessageEvent,
-        mapper,
-      ).then(resolve);
-    });
-    if (timeoutMillis === -1) {
-      return promise;
-    }
-    return withTimeout(timeoutMillis, promise);
+    return GlobalEventChannel.syncFromEvent<GuildPrivateMessageEvent, GuildPrivateMessageEvent>(
+      GuildPrivateMessageEvent,
+      mapper,
+    );
   }
 }
 
@@ -209,5 +185,5 @@ function createMapper<Ctx extends AbstractUserCommandSender, Event extends Messa
 }
 
 function isContextIdenticalWith(ctx: AbstractUserCommandSender, ev: MessageEvent) {
-  return ctx.user.id === ev.sender.id && ctx.subject.id === ev.subject.id;
+  return ctx.user?.id === ev.sender.id && ctx.subject?.id === ev.subject.id;
 }

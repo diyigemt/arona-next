@@ -23,6 +23,7 @@ class EventListeners {
   }
 
   addListener<E extends Event>(eventClass: ClassType<E>, listener: Listener<E>) {
+    // @ts-expect-error
     this.container.push(new ListenerRegistry(listener, eventClass));
   }
 
@@ -190,7 +191,7 @@ class SafeEventListener<E extends Event> implements Listener<E> {
     } catch (err) {
       const handler = block[CoroutineExceptionHandler];
       if (handler) {
-        handler(err);
+        handler(err as Error);
       } else {
         console.log(err);
       }

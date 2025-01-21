@@ -61,12 +61,12 @@ export abstract class AbstractContact implements Contact {
     const chain = MessageToMessageChain(messagePreSendEvent.message);
     const data = MessageChainToOpenapiPostData(chain, messageSequence);
     let result: OpenapiMessageEndpoint[EP]["RespType"] | null = null;
-    let error: Error | null;
+    let error: Error | undefined;
     if (this instanceof GroupImpl) {
       try {
         result = await this.bot.callOpenApi(endpoint, urlPlaceHolder, data as never);
       } catch (err) {
-        error = err;
+        error = err as Error;
       }
     }
     new postSendEventConstructor(this as unknown as C, chain, error, result as unknown as MessageReceipt<C>)
@@ -78,7 +78,7 @@ export abstract class AbstractContact implements Contact {
   async sendMessage(
     message: string | Message | MessageChain,
     messageSequence: number,
-  ): Promise<MessageReceipt<Contact>> {
+  ): Promise<MessageReceipt<Contact> | undefined> {
     if (typeof message === "string") {
       return this.sendMessage(new PlainText(message), messageSequence);
     } else if (Array.isArray(message)) {
@@ -93,7 +93,7 @@ export abstract class AbstractContact implements Contact {
     messageSequence: number,
   ): Promise<MessageReceipt<Contact> | undefined>;
 
-  async uploadImage(dataLike: string | Buffer): Promise<Image> {
+  async uploadImage(dataLike: string | Buffer): Promise<Image | undefined> {
     if (typeof dataLike !== "string") {
       return await this.uploadBufferImage(dataLike);
     }
@@ -236,7 +236,9 @@ export class GroupImpl extends AbstractContact implements Group {
     super(bot);
   }
 
-  members: ContactList<GroupMember> = new ContactList<GroupMember>((id: string) => new GroupMemberImpl(id, this, null));
+  members: ContactList<GroupMember> = new ContactList<GroupMember>(
+    (id: string) => new GroupMemberImpl(id, this, undefined),
+  );
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
 
   async doSendMessage(message: MessageChain, messageSequence: number): Promise<MessageReceipt<Group> | undefined> {
@@ -273,8 +275,10 @@ export class GuildMemberImpl extends AbstractContact implements GuildMember {
   asGuildChannelMember(channelOrId: string | GuildChannel): GuildChannelMember {
     if (typeof channelOrId === "string") {
       const channel = this.guild.channels.getOrCreate(channelOrId);
+      // @ts-expect-error
       return new GuildChannelMemberImpl(this.id, channel, null);
     }
+    // @ts-expect-error
     return new GuildChannelMemberImpl(this.id, channelOrId, null);
   }
 
@@ -354,6 +358,7 @@ export class GuildChannelImpl extends AbstractContact implements GuildChannel {
   }
 
   members: ContactList<GuildChannelMember> = new ContactList<GuildChannelMember>(
+    // @ts-expect-error
     (id: string) => new GuildChannelMemberImpl(id, this, null),
   );
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
@@ -391,16 +396,18 @@ export class GuildImpl extends AbstractContact implements Guild {
   }
 
   unionOpenidOrId: string = this.unionOpenid ?? this.id;
+  // @ts-expect-error
   members: ContactList<GuildMember> = new ContactList<GuildMember>((id: string) => new GuildMemberImpl(id, this, null));
   channels: ContactList<GuildChannel> = new ContactList<GuildChannel>(
+    // @ts-expect-error
     (id: string) => new GuildChannelImpl(id, this, null),
   );
-  isPublic: true;
+  isPublic: boolean = true;
 
   async doSendMessage(
     message: string | Message | MessageChain,
     messageSequence: number,
-  ): Promise<MessageReceipt<Contact>> {
+  ): Promise<MessageReceipt<Contact> | undefined> {
     return Promise.resolve(undefined);
   }
 }

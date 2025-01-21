@@ -38,8 +38,9 @@ export class Bot implements Contact {
   logger = NodeSimpleLogger(`Bot.${this.config.id}`);
   friends = new ContactList<Friend>((id: string) => new FriendImpl(id, this));
   groups = new ContactList<Group>((id: string) => new GroupImpl(id, this));
+  // @ts-expect-error
   guilds = new ContactList<Guild>((id: string) => new GuildImpl(id, this, null));
-  private accessTokenCoroutine: NodeJS.Timeout | null;
+  private accessTokenCoroutine: NodeJS.Timeout | undefined;
   private accessToken: string = "";
   private webhookPrivateKey = Buffer.from(this.config.secret.repeat(2).slice(0, 32));
   private webhookPublicKey = ed25519.getPublicKey(this.webhookPrivateKey);
@@ -92,11 +93,11 @@ export class Bot implements Contact {
     message: string | Message | MessageChain,
     messageSequence: number,
   ): Promise<MessageReceipt<Contact>> {
-    return Promise.resolve(undefined);
+    return Promise.resolve(undefined) as unknown as Promise<MessageReceipt<Contact>>;
   }
 
-  uploadImage(dataLike: string | Buffer): Promise<Image> {
-    return Promise.resolve(undefined);
+  async uploadImage(dataLike: string | Buffer): Promise<Image> {
+    return Promise.resolve(undefined) as unknown as Promise<Image>;
   }
 
   login() {

@@ -7,7 +7,7 @@ class BotManager {
     this.bots.push(bot);
   }
 
-  getBot(botId?: string): Bot {
+  getBot(botId?: string): Bot | undefined {
     if (botId) {
       return this.bots.find((bot) => bot.id === botId);
     }
