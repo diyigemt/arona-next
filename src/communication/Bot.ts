@@ -1,20 +1,20 @@
-import { Message, PlainText } from "./message/Message";
+import { Message } from "./message/Message";
 import { Image } from "./message/Image";
-import { MessageChain, MessageChainBuilder } from "./message/MessageChain";
+import { MessageChain } from "./message/MessageChain";
 import axios, { AxiosInstance } from "axios";
 import GlobalEventChannel, { BotEvent } from "./event/Event";
 import { EventChannel } from "./event/EventChannel";
 import { OpenApiAuthorizationReq, OpenApiAuthorizationResp } from "./types/Authorization";
-import { NodeSimpleLogger } from "../logger";
+import { NodeSimpleLogger } from "@/logger";
 import { BotAuthorizationSuccessEvent, BotOnlineEvent } from "./event/AuthorizationEvent";
-import { BotConfig } from "../types";
+import { BotConfig } from "@/types";
 import { MessageReceipt } from "./message/MessageReceipt";
 import { ed25519 } from "@noble/curves/ed25519";
 import BotManager from "./BotManager";
 import { COpenapiEndpoint, OpenApiUrlPlaceHolder, OpenapiEndpoint, OpenapiNeedData } from "./types/Openapi";
 import { Contact, ContactList, Friend, Group, Guild } from "./types/Contact";
 import { FriendImpl, GroupImpl, GuildImpl } from "./contact/Contact";
-import { initService } from "../service";
+import { initService } from "@/service";
 
 export class Bot implements Contact {
   constructor(private readonly config: BotConfig) {

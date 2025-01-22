@@ -20,5 +20,12 @@
     "noImplicitReturns": true,
     "alwaysStrict": true,
     "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@command/*": ["./src/command/*"],
+      "@communication/*": ["./src/communication/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@type/*": ["./src/types/*"]
+    }
   }
 }

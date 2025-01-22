@@ -1,35 +1,50 @@
 import { terminal, stringWidth } from "terminal-kit";
-
 // @ts-ignore
+import * as InlineInput from "terminal-kit/lib/document/InlineInput.js";
 const terminalWidth = terminal.width;
 const terminalHeight = terminal.height;
-terminal.grabInput(true);
-let obj: ReturnType<typeof terminal.inputField>;
+// @ts-ignore
+const document = terminal.createDocument();
+let obj: unknown;
 export function catchInput() {
-  obj = terminal.inputField(
-    {
-      // @ts-ignore
-      x: 0,
-      y: terminal.height,
-      cancelable: true,
+  obj = new InlineInput({
+    parent: document,
+    // @ts-ignore
+    x: 0,
+    y: terminal.height - 1,
+    width: terminal.width - 1,
+    cancelable: true,
+    prompt: {
+      content: "> ",
     },
-    (_, input) => {
-      if (input === "exit") {
-        process.exit(0);
-      }
-      obj.abort();
-      catchInput();
-    },
-  );
+  });
+  document.focusNext();
+  // @ts-ignore
+  obj.on("submit", (input: string) => {
+    if (input === "exit") {
+      terminal.hideCursor(false);
+      terminal.styleReset();
+      terminal.clear();
+      process.exit(0);
+    }
+    resetInput();
+  });
+}
+function resetInput() {
+  if (obj) {
+    // @ts-ignore
+    obj.setValue("");
+    // @ts-ignore
+    obj.autoResizeAndDraw();
+  }
 }
 terminal.on("key", (name: string) => {
   if (name === "CTRL_C") {
-    obj.abort();
-    catchInput();
+    resetInput();
   }
 });
 type LogType = "info" | "warning" | "error";
-let printHeight = 0;
+let printHeight = 1;
 export function printAbove(msg: string, type: LogType = "info") {
   const msgNeedLine = Math.ceil(stringWidth(msg) / terminalWidth);
   terminal.saveCursor();
@@ -49,5 +64,5 @@ export function printAbove(msg: string, type: LogType = "info") {
   }
   terminal.restoreCursor();
   // @ts-ignore
-  obj.redraw();
+  obj.autoResizeAndDraw();
 }
