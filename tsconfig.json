@@ -22,10 +22,12 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],
+      "@type/*": ["./src/types/*"],
+      "@db/*": ["./src/database/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@logger/*": ["./src/logger/*"],
       "@command/*": ["./src/command/*"],
       "@communication/*": ["./src/communication/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@type/*": ["./src/types/*"]
     }
   }
 }

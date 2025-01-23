@@ -4,5 +4,12 @@ bot:
   token: ""
   secret: ""
   debugMode: false
+database:
+  mongodb:
+    host: ""
+    port: 27017
+    user: ""
+    password: ""
+    db: ""
 web:
   port: 8080

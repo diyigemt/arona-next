@@ -1,10 +1,10 @@
 import * as Commands from "../service";
-import { ClassType } from "../communication/types/Helper";
-import { ReflectMetadataKey } from "../types/decorator";
+import { ReflectMetadataKey } from "@type/decorator";
 import { AbstractCommand } from "./AbstractCommand";
-import { Message, PlainText } from "../communication/message/Message";
+import { Message, PlainText } from "@communication/message/Message";
 import { AbstractCommandSender } from "./CommandSender";
-import { MessageToMessageChain } from "../communication/message/MessageChain";
+import { MessageToMessageChain } from "@communication/message/MessageChain";
+import { ClassType } from "@type/Helper";
 
 type CommandSignature = {
   clazz: ClassType<AbstractCommand>;
@@ -56,6 +56,7 @@ export function registerAllCommand() {
       }
     });
   }
+
   function findParentOrUndefined(
     signature: CommandSignature,
     parent: ClassType<AbstractCommand>,

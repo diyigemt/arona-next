@@ -1,5 +1,6 @@
 import GlobalEventChannel, { Event } from "./Event";
-import { ClassType } from "../types/Helper";
+
+import { ClassType } from "@type/Helper";
 
 const CoroutineExceptionHandler = Symbol.for("CoroutineExceptionHandler");
 

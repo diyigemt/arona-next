@@ -3,12 +3,12 @@ import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify
 import { AppModule } from "./app.module";
 import * as YAML from "yaml";
 import * as fs from "node:fs";
-import { Bot } from "./communication/Bot";
+import { Bot } from "@communication/Bot";
 import { AronaConfig } from "./types";
-import { registerAllCommand } from "./command/CommandManager";
+import { registerAllCommand } from "@command/CommandManager";
 import "reflect-metadata";
-import { initTerminal } from "./logger";
-import { NestLogger } from "./logger/NestLogger";
+import { initTerminal } from "@/logger";
+import { NestLogger } from "@logger/NestLogger";
 
 const config = YAML.parse(fs.readFileSync("./config.yaml", "utf8")) as AronaConfig;
 

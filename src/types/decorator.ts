@@ -1,7 +1,8 @@
 import "reflect-metadata";
 import { AbstractCommand } from "@command/AbstractCommand";
 import { AbstractCommandSender } from "@command/CommandSender";
-import { ClassType } from "@communication/types/Helper";
+import { ClassType } from "@type/Helper";
+
 export enum ReflectMetadataKey {
   PROP_TYPE = "design:type", // 编译时属性类型
   PARAM_TYPES = "design:paramtypes", // 编译时函数入参类型
