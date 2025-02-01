@@ -14,12 +14,20 @@ export interface UserSchema {
 }
 
 export class UserSchemaImpl implements UserSchema {
-  constructor(
-    public _id: number,
-    public username: string,
-    public uid: string,
-    public unionOpenId: string,
-    public contacts: string[],
-    public config = {},
-  ) {}
+  _id!: number;
+  username!: string;
+  uid!: string;
+  unionOpenId!: string;
+  contacts!: string[];
+  config!: {
+    [key: string]: PluginConfig;
+  };
+  constructor(builder: UserSchema) {
+    this._id = builder._id;
+    this.username = builder.username;
+    this.uid = builder.uid;
+    this.unionOpenId = builder.unionOpenId;
+    this.contacts = builder.contacts;
+    this.config = builder.config;
+  }
 }

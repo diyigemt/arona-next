@@ -1,8 +1,10 @@
 import { Message, PlainText } from "./Message";
+import { ClassType } from "@type/Helper";
 
 export interface MessageChain extends Message, Array<Message> {
   messageId: string;
   eventId?: string;
+  filterIsInstance<M extends Message>(clazz: ClassType<M>): M[];
 }
 
 export class MessageChainImpl extends Array<Message> implements MessageChain {
@@ -24,6 +26,11 @@ export class MessageChainImpl extends Array<Message> implements MessageChain {
       this.eventId = ch.eventId;
     }
     return ([] as unknown[]).push.apply(this, items);
+  }
+
+  filterIsInstance<M extends Message>(clazz: ClassType<M>): M[] {
+    // @ts-ignore
+    return this.filter((it) => Promise.resolve(it instanceof clazz));
   }
 
   // @ts-ignore

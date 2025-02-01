@@ -424,7 +424,7 @@ function MessageChainToOpenapiPostData(messageChain: MessageChain, messageSequen
     event_id: messageChain.eventId,
     msg_seq: messageSequence,
   };
-  const im = messageChain.filter((it) => it instanceof AbstractImage);
+  const im = messageChain.filterIsInstance(AbstractImage);
   if (im.length > 0) {
     toSend.msg_type = OpenapiMessagePostType.FILE;
     const image = im[im.length - 1];
